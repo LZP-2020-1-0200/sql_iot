@@ -41,9 +41,12 @@ export const test = async ()=>{
 export const clearDB=async ()=>{
 	if(await test()){
 		await sequelize.sync();
+		// because we are using foreign keys, we need to disable them before dropping the tables
 		await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
 		await sequelize.drop();
+		// re-enable foreign keys
 		await sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+		// re-sync the database
 		await sequelize.sync();
 	}
 };
