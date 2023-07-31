@@ -1,0 +1,16 @@
+# This is the configuration file for the STS server
+
+[server]
+port = 80
+
+[database]
+name = "sts_db"
+username = "ST_server"
+password = "$*wY700O6^4$l2"
+host = "localhost"
+
+[messageQueue]
+# monitorReloadTime is the time in milliseconds
+# between each check for new messages
+monitorReloadTime = 3000
+

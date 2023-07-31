@@ -1,3 +1,5 @@
+import * as toml from 'toml';
+import fs from 'fs';
 
 export type JSONValue =
     | string
@@ -5,14 +7,20 @@ export type JSONValue =
     | boolean
     | { [x: string]: JSONValue }
     | Array<JSONValue>;
+const config = toml.parse(fs.readFileSync('./config.toml', 'utf-8'));
 
-export const database = {
-	name: "sts_db",
-	username: "ST_server",
-	password: "$*wY700O6^4$l2",
-	host:"localhost"
+
+export const server = config.server as {
+	port: number;
 };
-export const messageQueue = {
-	monitorReloadTime: 3000,
-    
+
+export const database = config.database as {
+	name: string;
+	username: string;
+	password: string;
+	host: string;
+};
+
+export const messageQueue = config.messageQueue as {
+	monitorReloadTime: number;
 };

@@ -8,7 +8,7 @@
   "scripts": {
     "start": "npm run compile && node ./build/server.js",
     "clean": "npx tsc --build --clean ./source",
-    "compile": "npx tsc --project ./source",
+    "compile": "npm run copy-config && tsc --project ./source",
     "build": "npm run clean && npm run compile",
     "test": "npm run compile && node --test",
     "lint": "eslint . --ext .ts",
@@ -20,7 +20,8 @@
   },
   "nodemonConfig": {
     "watch": [
-      "source"
+      "source",
+      "config.toml"
     ],
     "ext": "ts",
     "delay": "200",
@@ -56,6 +57,7 @@
     "rollup-plugin-scss": "^4.0.0",
     "sequelize": "^6.31.0",
     "sequelize-typescript": "^2.1.5",
+    "toml": "^3.0.0",
     "typescript": "^4.9.5",
     "validator": "^13.9.0"
   },
@@ -65,6 +67,7 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.39.0",
     "sass": "^1.62.1",
     "supertest": "^6.3.3"

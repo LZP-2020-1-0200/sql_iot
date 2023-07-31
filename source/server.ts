@@ -2,9 +2,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import type { MessagePayload, QueueResponse} from './lib/messageQueue.js';
 import { mainQueue } from './lib/messageQueue.js';
-
+import { server as config } from './config.js';
 const app = express();
-const port = 80;
+const port = config.port;
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 app.use(express.json());
