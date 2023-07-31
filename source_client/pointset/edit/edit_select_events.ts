@@ -1,5 +1,5 @@
 import $ from 'jquery';
-
+import { getBox } from './loc_update.js';
 /**
  * Contains the current state of the mouse
  */
@@ -22,18 +22,13 @@ export let end = { x: 0, y: 0};
 $('#ptCanvas').on('mousedown', (e) => {
 	const svg = $('#ptCanvas')[0] as HTMLElement & SVGElement;
 	const rect = (svg as SVGElement).getBoundingClientRect();
-	const viewbox = svg.getAttribute('viewBox');
-	if(viewbox !== null) {
-		const ps = viewbox.split(' ');
-		const params: number[]=[];
-		ps.forEach(p => { params.push(Number(p)); });
-		// console.log(params);
-		const x = params[0] + (params[2])*e.offsetX/(rect.width);
-		const y = params[1] + (params[3])*e.offsetY/(rect.height);
-		start = { x, y };
-		end = { x, y };
-		dragging=true;
-	}
+	const viewbox = getBox();
+	const x = viewbox.x + (viewbox.w)*e.offsetX/(rect.width);
+	const y = viewbox.y + (viewbox.h)*e.offsetY/(rect.height);
+	start = { x, y };
+	end = { x, y };
+	dragging=true;
+	
 });
 
 // update the end point when the mouse moves while dragging
@@ -41,16 +36,11 @@ $('#ptCanvas').on('mousemove', (e) => {
 	if(!dragging) return;
 	const svg = $('#ptCanvas')[0] as HTMLElement & SVGElement;
 	const rect = (svg as SVGElement).getBoundingClientRect();
-	const viewbox = svg.getAttribute('viewBox');
-	if(viewbox !== null) {
-		const ps = viewbox.split(' ');
-		const params: number[]=[];
-		ps.forEach(p => { params.push(Number(p)); });
-		// console.log(params);
-		const x = params[0] + (params[2])*e.offsetX/(rect.width);
-		const y = params[1] + (params[3])*e.offsetY/(rect.height);
-		end = { x, y };
-	}
+	const viewbox = getBox();
+	const x = viewbox.x + (viewbox.w)*e.offsetX/(rect.width);
+	const y = viewbox.y + (viewbox.h)*e.offsetY/(rect.height);
+	end = { x, y };
+	
 });
 
 // clear dragging when the mouse is released to not update the end point

@@ -11,7 +11,7 @@ import { Psd, dataCals } from '../edit/init.js';
  * Throws an error if the viewBox is not set
  * @returns an object containing viewbox parameters
  */
-function getBox() {
+export function getBox() {
 	const coords = $('#ptCanvas').attr('viewBox')?.split(' ');
 	if (coords === undefined) throw "Uhhh... no viewBox??";
 	return { x: Number(coords[0]), y: Number(coords[1]), w: Number(coords[2]), h: Number(coords[3]) };
@@ -21,7 +21,7 @@ function getBox() {
  * Fetches and calculates the bounds of the viewBox
  * @returns an object containing the min and max bounds of the viewBox
  */
-function getBounds() {
+export function getBounds() {
 	const box = getBox();
 	const x2 = box.x+box.w;
 	const y2 = box.y+box.h;
@@ -40,7 +40,7 @@ function getBounds() {
 /**
  * Constrains a point to the viewBox
  */
-function constrainToBox(coord: {x: number; y: number}) {
+export function constrainToBox(coord: {x: number; y: number}) {
 	const bounds = getBounds();
 	return {
 		x: Math.min(Math.max(bounds.min.x, coord.x), bounds.max.x),
