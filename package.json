@@ -8,7 +8,7 @@
   "scripts": {
     "start": "npm run compile && node ./build/server.js",
     "clean": "npx tsc --build --clean ./source",
-    "compile": "npm run copy-config && tsc --project ./source",
+    "compile": "tsc --project ./source",
     "build": "npm run clean && npm run compile",
     "test": "npm run compile && node --test",
     "lint": "eslint . --ext .ts",

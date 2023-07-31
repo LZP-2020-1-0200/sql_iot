@@ -156,9 +156,13 @@ class STSClient:
         self.on("set_local_calibration", self._set_local_calibration)
         self.on("reference", self._get_ref)
         self.on("move", self._move)
+
+        """A callback accepting a reference type and experiment id, that is called when a reference is ordered."""
         self.onmeasure: Callable[
             [int, int], None
         ] = lambda _,__:None  # empty lambda by default
+
+        """A callback accepting a single point, that is called when a move is ordered."""
         self.onmove:Callable[[STSPoint],None]=lambda _:None
 
         """A callback accepting a single point, experiment id and point number, that is called
@@ -225,12 +229,17 @@ class STSClient:
         self.cal_c=STSPoint(body["C"]['x'], body["C"]['y'], body["C"]['z'])
 
     def _get_ref(self, body: dict[str, Any]):
+        """Responds to a reference request from the server,
+        calling onmeasure with the reference type and experiment id."""
         try:
             self.onmeasure(int(body["refType"]), int(body["experimentId"]))
         finally:
             pass
 
     def _measure(self, body: dict[str, Any]):
+        """Responds to a measurement request from the server,
+        sending the measurement data in response.
+        """
         if body["sequence"] == self._sequence_num:
             point: STSPoint = STSPoint(
                 int(body["point"]["x"]), int(body["point"]["y"]), int(body["point"]["z"])
@@ -250,6 +259,9 @@ class STSClient:
 
 
     def _inform(self, _: dict[str, Any]):
+        """Responds to a ping from the server, 
+        sending the instrument data in response.
+        """
         print("ping")
         self.emit(
             "instrument_data",
@@ -261,6 +273,7 @@ class STSClient:
         )
 
     def _event_thread_func(self) -> None:
+        """The event thread function, that is run in a seperate thread."""
         while self._event_alive:
             try:
                 retrieve_response: requests.Response = requests.get(
@@ -300,9 +313,11 @@ class STSClient:
                 self._callbacks[top] = callback
 
     def _ready(self) -> None:
+        """Sends a ready message to the server"""
         self.emit("ready", {"sequence": self._sequence_num, "name": self._name})
 
     def _err_chk(self) -> None:
+        """Checks if the event thread has crashed and raises the error if it has"""
         if self._event_crash:
             raise self._event_crash
 

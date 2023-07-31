@@ -1,5 +1,4 @@
 
-
 import express from 'express';
 import { Point, Pointset, Sample } from '../models/index.js';
 import type { PointData, calibrationSet } from '../lib/coordinate.js';
