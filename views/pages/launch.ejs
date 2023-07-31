@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launching of experiments</title>
+</head>
+<body>
+    <table id="device_table">
+
+    </table>
+    <button onclick="refreshDevices()">Refresh devices</button><br>
+    <select name="" id="experiment_select">
+        <% experiments.forEach(element => { %>
+            <option value="<%= element.ID %>"><%= element.Name %></option>
+        <% }); %>
+    </select><br>
+    <button onclick="launchExperiment()">Launch experiment</button>
+    <script src="../js/STSController.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script>
+        var stsc = new STSController("http://192.168.5.19");
+        
+        refreshDevices();
+        async function refreshDevices(){
+            $('#device_table')[0].innerHTML="";
+            await stsc.pingDevices();
+            for(let i=0;i<3;i++){
+                await new Promise(resolve=>setTimeout(resolve,1000));
+                response = await stsc.getDevices();
+                $('#device_table')[0].innerHTML="";
+                console.log(response);
+                $('<tr>').append(
+                    $('<td>').text("Name"),
+                    $('<td>').text("Sequence number"),
+                    $('<td>').text("Is device priority?")
+                ).appendTo('#device_table');
+                response.forEach(item=>{
+                    var $tr = $('<tr>').append(
+                        $('<td>').text(item.name),
+                        $('<td>').text(item.sequence),
+                        $('<td>').text(item.priority)
+                    ).appendTo('#device_table');
+                });
+            }
+        }
+
+        async function launchExperiment(){
+            console.log($('#experiment_select').val());
+            await stsc.launchExperiment(Number($('#experiment_select').val()));
+        }
+
+    </script>
+</body>
+</html>

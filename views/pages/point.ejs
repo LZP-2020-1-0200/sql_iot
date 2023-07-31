@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point setup</title>
+    <link rel="stylesheet" href="../css/point.css">
+</head>
+<body>
+    <canvas id="ptCanvas"></canvas>
+    <div id="control_panel">
+        <button onclick="canva.fontSize++; canva.refreshData();">Increase font size</button><br>
+        <button onclick="canva.fontSize--; canva.refreshData();">Decrease font size</button><br>
+        <input type="number" id="ptNumField">
+        <button onclick="stsc.addPointToSet(pointSetId, Number($('#ptNumField').val()),canva.lastClick.x,canva.lastClick.y,0); fetchPoints();">Add point</button><br>
+        <button onclick="stsc.removePointFromSet(pointSetId, Number($('#ptNumField').val())); fetchPoints();">Remove point</button><br>
+        
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="../js/STSController.js"></script>
+    <script>
+        const pointSetId = <%= pointSetId %>;
+        var ctx;
+        const size=1200;
+        $("#ptCanvas")[0].width=size;
+        $("#ptCanvas")[0].height=size;
+        
+        const pad=20;
+        var stsc = new STSController("http://192.168.5.19");
+
+        var lastPos={x:0, y:0};
+        class CanvaDisplay{
+            constructor(size, padding) {
+                this.pad=padding;
+                this.size = size;
+                this.pts=[];
+                this.min={x:999999, y:999999};
+                this.max={x:-999999, y:-999999};
+                this.lastClick={x:-999999,y:-999999};
+                this.fontSize=16;
+            }
+            
+            clear(){
+                this.pts=[];
+                this.min={x:999999, y:999999};
+                this.max={x:-999999, y:-999999};
+            }
+
+            fromLocal(point){
+                let xRange = this.max.x-this.min.x;
+                let yRange = this.max.y-this.min.y;
+                let range = Math.max(xRange, yRange);
+                let innerS = this.size-2*this.pad;
+
+                let pad_comp = {x:(point.x-pad)/innerS, y:(point.y-pad)/innerS};
+                let range_comp = {x:pad_comp.x*range+this.min.x, y:pad_comp.y*range+this.min.y};
+                return range_comp;
+            }
+
+            refreshData(){
+                ctx.font=this.fontSize+"px Arial";
+                ctx.clearRect(0, 0, this.size, this.size);
+                ctx.strokeRect(0,0, this.size, this.size);
+                let oldStyle = ctx.fillStyle;
+                
+                let xRange = this.max.x-this.min.x;
+                let yRange = this.max.y-this.min.y;
+                let range = Math.max(xRange, yRange);
+                let innerS = this.size-2*this.pad;
+                for(let i=0;i<this.pts.length;i++){
+                    let pt=this.pts[i];
+                    let transformedX = (pt.x-this.min.x)/range;
+                    let transformedY = (pt.y-this.min.y)/range;
+                    let xVal = pad+transformedX*innerS;
+                    let yVal = pad+transformedY*innerS;
+                    ctx.fillStyle=pt.color;
+                    ctx.fillText(pt.label, xVal+3, yVal-3);
+                    ctx.fillStyle=pt.color;
+                    ctx.fillRect(xVal-2,yVal-2,4,4);
+                }
+                let lClick={
+                    x:pad+innerS*(this.lastClick.x-this.min.x)/range,
+                    y:pad+innerS*(this.lastClick.y-this.min.y)/range
+                };
+                ctx.fillStyle='blue';
+                ctx.fillRect(0,lClick.y,this.size,1);
+                ctx.fillRect(lClick.x,0,1,this.size);
+                ctx.fillStyle = oldStyle;
+            }
+
+            addPoint(x,y, label, color){
+                this.min = {x:Math.min(this.min.x,x),y:Math.min(this.min.y,y)};
+                this.max = {x:Math.max(this.max.x,x),y:Math.max(this.max.y,y)};
+                this.pts.push({x:x, y:y, label:label, color:color});
+                this.refreshData();
+            }
+        };
+
+        let canva = new CanvaDisplay(size, pad);
+
+        function fetchPoints(){
+            canva.clear();
+            stsc.getPointsOfSet(pointSetId).then((pts)=>{
+                canva.addPoint(pts.calPoints[0].Ax, pts.calPoints[0].Ay, "A", 'red');
+                canva.addPoint(pts.calPoints[0].Bx, pts.calPoints[0].By, "B", 'red');
+                canva.addPoint(pts.calPoints[0].Cx, pts.calPoints[0].Cy, "C", 'red');
+                pts.points.forEach(element => {
+                    canva.addPoint(element.X, element.Y, element.PointNumber, 'black');
+                });
+            });
+        }
+        $(()=>{
+            ctx = $("#ptCanvas")[0].getContext('2d');
+            fetchPoints();
+        });
+        $("#ptCanvas").click(function(e){
+            let mouseX = e.pageX - ($("#ptCanvas").offset().left);
+            let mouseY = e.pageY - ($("#ptCanvas").offset().top);
+            lastPos={x:mouseX, y:mouseY};
+            console.log(lastPos);
+            canva.lastClick=canva.fromLocal(lastPos);
+            canva.refreshData();
+
+        });
+    </script>
+</body>
+</html>

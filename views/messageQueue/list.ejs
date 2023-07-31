@@ -1,0 +1,12 @@
+<table>
+    <tr>
+        <th> Topic </th>
+        <th> Body </th>
+    </tr>
+    <% messages.forEach(element=>{ %>
+        <tr>
+            <td><%- element.topic %></td>
+            <td><%- JSON.stringify(element.body) %></td>
+        </tr>
+    <% }); %>
+</table>

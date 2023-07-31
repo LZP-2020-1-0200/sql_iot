@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Editing a pointset</title>
+	<link rel="stylesheet" href="/bundles/pointset/edit/style.css">
+</head>
+<body>
+	<form action="" id = "updateForm">
+		<label for="name">Name</label>
+        <input type="text" name="name" value="<%= pointSet.name %>">
+        <label for="description">Description</label>
+        <input type="text" name="description" value="<%= pointSet.description %>"><br>
+		<h2>Calibration points</h2>
+		<h3>A</h3>
+        x: <input type="number" name="calAx" value="<%= pointSet.calibration.A.x %>" id="cax" readonly><br>
+        y: <input type="number" name="calAy" value="<%= pointSet.calibration.A.y %>" id="cay" readonly><br>
+        z: <input type="number" name="calAz" value="<%= pointSet.calibration.A.z %>" id="caz" readonly><br>
+        <button type="button" id="aBtn">Set</button><br>
+        <h3>B</h3>
+		x: <input type="number" name="calBx" value="<%= pointSet.calibration.B.x %>" id="cbx" readonly><br>
+        y: <input type="number" name="calBy" value="<%= pointSet.calibration.B.y %>" id="cby" readonly><br>
+        z: <input type="number" name="calBz" value="<%= pointSet.calibration.B.z %>" id="cbz" readonly><br>
+        <button type="button" id="bBtn">Set</button><br>
+        <h3>C</h3>
+		x: <input type="number" name="calCx" value="<%= pointSet.calibration.C.x %>" id="ccx" readonly><br>
+        y: <input type="number" name="calCy" value="<%= pointSet.calibration.C.y %>" id="ccy" readonly><br>
+        z: <input type="number" name="calCz" value="<%= pointSet.calibration.C.z %>" id="ccz" readonly><br>
+        <button type="button" id="cBtn">Set</button><br>
+		<input type="submit" value="Save changes"><br>
+	</form>
+	
+	<br>
+
+	<% 
+		const size = Math.max((bounds.max.x - bounds.min.x), (bounds.max.y - bounds.min.y));
+		const pad = 0.1*size;
+		const fontSize = 1.9*size*radius;
+	%>
+    <svg id="ptCanvas" viewBox = "<%= bounds.min.x-pad %> <%= bounds.min.y-pad %> <%= size+2*pad %> <%= size+2*pad %>">
+		<rect id="selection" x="<%= bounds.min.x %>" y="<%= bounds.min.y %>" fill="rgba(0,0,255,0.5)" width="600" height="600" hidden></rect>
+		<line id="drawieLine" stroke="black" stroke-width="0.25%"></line>
+		<g id="previewCircles"></g>
+		<% pointSet.points.forEach(point => { %>
+			<g number="<%= point.pointNumber %>" class="point <%- !point.enabled?"disabledPt":"" %>">
+				<circle number="<%= point.pointNumber %>" cx = "<%= point.x %>" cy = "<%= point.y %>" r = "<%= radius*size %>"></circle>
+				<text class="svgtxt" fill = "white" 
+					font-size="<%= fontSize %>"
+					x = "<%= point.x %>"
+					y = "<%= point.y %>"
+					number="<%= point.pointNumber %>"
+					alignment-baseline="middle" text-anchor="middle">
+					<%= point.pointNumber %>
+				</text>
+			</g>
+		<% }); %>
+		<circle fill="brown" cx = "<%= pointSet.calibration.A.x %>" cy = "<%= pointSet.calibration.A.y %>" r = "<%= radius*size %>" ></circle>
+		<text class="svgtxt" fill = "white" font-size="<%= fontSize %>" x = "<%= pointSet.calibration.A.x %>" y = "<%= pointSet.calibration.A.y %>" alignment-baseline="middle" text-anchor="middle">A</text>
+		<circle fill="brown" cx = "<%= pointSet.calibration.B.x %>" cy = "<%= pointSet.calibration.B.y %>" r = "<%= radius*size %>" ></circle>
+		<text class="svgtxt" fill = "white" font-size="<%= fontSize %>" x = "<%= pointSet.calibration.B.x %>" y = "<%= pointSet.calibration.B.y %>" alignment-baseline="middle" text-anchor="middle">B</text>
+		<circle fill="brown" cx = "<%= pointSet.calibration.C.x %>" cy = "<%= pointSet.calibration.C.y %>" r = "<%= radius*size %>" ></circle>
+		<text class="svgtxt" fill = "white" font-size="<%= fontSize %>" x = "<%= pointSet.calibration.C.x %>" y = "<%= pointSet.calibration.C.y %>" alignment-baseline="middle" text-anchor="middle">C</text>
+		<circle id="locationMarker" cx = "0" cy = "0" fill = "green" r = "<%= radius*size * 0.6 %>"></circle>
+	</svg>
+	<input type="radio" name="dragmode" id="select" value="SELECT_MODE" checked>
+	<label for="single">Select</label>
+	<input type="radio" name="dragmode" id="draw" value="DRAW_MODE">
+	<label for="line">Draw</label>
+	<button id="disableButton">Disable selected</button>
+	<button id="enableButton">Enable selected</button> <br>
+	<input type="radio" name="pointmode" id="single" value="single" checked>
+	<label for="single">Single</label>
+	<input type="radio" name="pointmode" id="line" value="line">
+	<label for="line">Line</label>
+	<input type="radio" name="pointmode" id="rectangle" value="rectangle">
+	<label for="rectangle">Rectangle</label>
+	<div id="singleDiv">
+		<button id="addSingle">Add single point</button>
+	</div>
+	<div id="lineDiv" hidden>
+		<label for="linePointCount">Point count</label>
+		<input type="number" name="linePointCount" id="lineCount">
+		<button type="button" id="lineStartBtn">Set start</button>
+		<button type="button" id="lineEndBtn">Set end</button>
+		<button type="button" id="lineCreateBtn">Add</button>
+	</div>
+	<div id="rectangleDiv" hidden>
+		3
+	</div>
+	<!--<script src="/bundles/pointset/edit/bundle.js" type="module"></script>-->
+	<script type="module">
+		import { init, transformMatrix } from '/bundles/pointset/edit/bundle.js';
+		const points = [
+			<% pointSet.points.forEach(point => { %>
+				<%- JSON.stringify({x: point.x, y: point.y, z: point.z}, '') %>,
+			<% }); %>
+		];
+		const id = <%= pointSet.id %>
+		const calibration = JSON.parse('<%- JSON.stringify(pointSet.calibration); %>');
+		const ptRadius = <%= radius*size %>
+		console.log(calibration);
+		init(id, calibration, ptRadius);
+	</script>
+
+</body>
+</html>

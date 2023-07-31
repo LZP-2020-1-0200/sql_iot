@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage control</title>
+</head>
+<body>
+    <script src="../js/STSController.js"></script>
+    <script>
+        let stsc=new STSController("http://localhost");
+        async function printPoint(){
+            pt_data = (await stsc.getPoint());
+            if(pt_data)console.log(pt_data.x, pt_data.y);
+            else console.log("Timed out");
+            setTimeout(printPoint, 100);
+        }
+        //printPoint();
+    </script>
+    <input type="number" value="1000" name="multiplier" id="multiplier">
+    <table>
+        <tr>
+            <td></td>
+            <td><button onclick="stsc.rel_move(0,+multiplier.value)">^</button></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><button onclick="stsc.rel_move(-(+multiplier.value),0)">&lt;</button></td>
+            <td><button onclick="stsc.rel_move(0,-(+multiplier.value))">v</button></td>
+            <td><button onclick="stsc.rel_move(+multiplier.value,0)">&gt;</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="stsc.set_cal('A')">A</button></td>
+            <td><button onclick="stsc.set_cal('B')">B</button></td>
+            <td><button onclick="stsc.set_cal('C')">C</button></td>
+        </tr>
+    </table>
+    
+</body>
+</html>

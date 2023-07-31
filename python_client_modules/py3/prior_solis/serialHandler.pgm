@@ -1,0 +1,89 @@
+configDir$="P:\Solis-Development\SOLIS.cfg"
+SOLISresponse$=""
+SaveDir$=""
+stagePortNumber=2
+appPortNumber=3
+endReached=0
+print("starting")
+while (endReached==0)
+	read(configDir$, configLine$)
+	if (len(configLine$)>0) then
+		if (strcomp(configLine$,"STAGE_PORT")==0) then
+			read(configDir$, configVal$)
+			stagePortNumber=val(configVal$)
+		endif
+		if (strcomp(configLine$,"APP_PORT")==0) then
+			read(configDir$, configVal$)
+			appPortNumber=val(configVal$)
+		endif
+		if (strcomp(configLine$,"END")==0) then
+			endReached=1
+		endif
+	endif
+	
+wend
+close()
+print("Stage port: COM";stagePortNumber)
+print("Application port: COM";appPortNumber)
+//returns "" if read line has to be passed to stage,
+//otherwise returns the response string
+function ~HandleSolisCommands(line$)
+	spaceIndex=instr(line$," ")
+	command$=line$
+	args$=""
+	if (spaceIndex!=0) then
+		command$=left$(line$,spaceIndex-1)
+		args$=mid$(line$,spaceIndex+1, len(line$)-spaceIndex)
+	endif
+	
+	HandleSolisCommands=0
+	if (strcomp(command$, "PING")==0) then
+		HandleSolisCommands=1
+		SOLISresponse$="OK"
+		print("ping received...")
+	endif
+	if (strcomp(command$,"RUN")==0) then
+		HandleSolisCommands=2
+		SOLISresponse$="OK"
+		run()
+		fileName$=""
+		if (spaceIndex!=0) then
+			fileName$=SaveDir$+"\"+args$
+		else
+			fileName$=SaveDir$+"\"+str$(time())+".asc"
+		endif
+
+		SaveAsciiXY(#0,fileName$,2,1)
+		print(fileName$)
+		closeWindow(#0)
+	endif
+	if (strcomp(command$,"SDIR")==0) then
+		HandleSolisCommands=3
+		SaveDir$=args$
+		SOLISresponse$="OK"
+	endif
+	print(SOLISresponse$)
+	
+return
+
+//comread(3,stageResponse$)
+while(1)
+	//reads the input
+	print("waiting for input...")
+	comread(1,pyInput$)
+	print("received...")
+	print(pyInput$)
+	if (~HandleSolisCommands(pyInput$)==0) then
+		print("forwarding to stage...")
+		comwrite(stagePortNumber,pyInput$)
+		comread(stagePortNumber,stageResponse$)
+		print(stageResponse$)
+		comwrite(appPortNumber,stageResponse$)
+	else
+		print("capturing")
+		print(SOLISresponse$)
+		comwrite(appPortNumber,"OK")
+	endif
+	
+	
+wend

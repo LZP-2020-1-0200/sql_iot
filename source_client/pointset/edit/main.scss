@@ -1,0 +1,31 @@
+#ptCanvas {
+	border: 3px solid black;
+} 
+
+.svgtxt{
+	-webkit-touch-callout: none;
+	-webkit-user-select:none;
+	-khtml-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	-o-user-select:none;
+	user-select:none;
+}
+
+g.selectedPt {
+	circle {
+		fill: aquamarine;
+	}
+	text {
+		fill: black;
+	}
+}
+
+.disabledPt {
+	circle {
+		fill: beige;
+	}
+	text {
+		fill: gray;
+	}
+}

@@ -1,0 +1,6 @@
+node_modules
+.vscode
+.mypy_cache
+build
+static/bundles
+**/__pycache__

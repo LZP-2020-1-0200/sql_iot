@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a pointset</title>
+</head>
+<body>
+    <form action="../add_pointset" id="ptsetform" method="post">
+        pointset name: 
+        <input type="text" name="name" id=""><br>
+        <label for="sampleId">Sample:</label>
+        <select name="sampleId" id="samples">
+            <% samples.forEach(element => { %>
+             <option value="<%= element.ID %>">
+                <%- element.Name %> <%- ((element.Description.length<=maxDescL+3)?element.Description:element.Description.substring(0,maxDescL)+"...") %>
+             </option>
+            <% }) %>
+        </select>
+        
+    </form>
+    <table>
+        <tr>
+            <td>Calibration A</td>
+            <td>Calibration B</td>
+            <td>Calibration C</td>
+        </tr>
+        <tr>
+            <td>
+                x:<input form="ptsetform" type="number" name="calAx" id="cax" readonly><br>
+                y:<input form="ptsetform" type="number" name="calAy" id="cay" readonly><br>
+                z:<input form="ptsetform" type="number" name="calAz" id="caz" readonly><br>
+                <button type="button" onclick="set_cal($('#cax'), $('#cay'), $('#caz'), 'A');">Set</button>
+            </td>
+            <td>
+                x:<input form="ptsetform" type="number" name="calBx" id="cbx" readonly><br>
+                y:<input form="ptsetform" type="number" name="calBy" id="cby" readonly><br>
+                z:<input form="ptsetform" type="number" name="calBz" id="cbz" readonly><br>
+                <button type="button" onclick="set_cal($('#cbx'), $('#cby'), $('#cbz'), 'B');">Set</button>
+            </td>
+            <td>
+                x:<input form="ptsetform" type="number" name="calCx" id="ccx" readonly><br>
+                y:<input form="ptsetform" type="number" name="calCy" id="ccy" readonly><br>
+                z:<input form="ptsetform" type="number" name="calCz" id="ccz" readonly><br>
+                <button type="button" onclick="set_cal($('#ccx'), $('#ccy'), $('#ccz'), 'C');">Set</button>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <input form="ptsetform" type="submit" value="Add pointset">
+
+
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="../js/STSController.js"></script>
+    <script>
+        var stsc = new STSController("http://localhost");
+        async function set_cal(inputA, inputB, inputC, cal_pt_name){
+            let calPt = await stsc.getPoint();
+            console.log(inputA,inputB,inputC);
+            console.log(calPt);
+            if(calPt){
+                inputA.val(calPt.x);
+                inputB.val(calPt.y);
+                inputC.val(calPt.z);
+                stsc.set_cal(cal_pt_name);
+            }else{
+                alert("No stage device reported location");
+            }
+        }
+    </script>
+</body>
+</html>

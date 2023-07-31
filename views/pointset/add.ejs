@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add new pointset</title>
+    <script src="/bundles/pointset/bundle.js" type="module"></script>
+</head>
+<body>
+    <form action="" method="post">
+        <label for="name">Name</label>
+        <input type="text" name="name">
+        <label for="description">Description</label>
+        <input type="text" name="description">
+        <input type="hidden" name="sampleId" value="<%- sample.id %>"><br>
+        <h2>Calibration points</h2>
+		<h3>A</h3>
+        x: <input type="number" name="calAx" id="cax" readonly><br>
+        y: <input type="number" name="calAy" id="cay" readonly><br>
+        z: <input type="number" name="calAz" id="caz" readonly><br>
+        <button type="button" id="aBtn">Set</button><br>
+        <h3>B</h3>
+        x: <input type="number" name="calBx" id="cbx" readonly><br>
+        y: <input type="number" name="calBy" id="cby" readonly><br>
+        z: <input type="number" name="calBz" id="cbz" readonly><br>
+        <button type="button" id="bBtn">Set</button><br>
+        <h3>C</h3>
+        x: <input type="number" name="calCx" id="ccx" readonly><br>
+        y: <input type="number" name="calCy" id="ccy" readonly><br>
+        z: <input type="number" name="calCz" id="ccz" readonly><br>
+        <button type="button" id="cBtn">Set</button>
+        <input type="submit" value="Add">
+    </form>
+</body>
+</html>

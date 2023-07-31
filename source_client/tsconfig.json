@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "ES6",
+        "rootDir":"./",
+        "outDir":"../static/js",
+        "target": "ESNext", // or a more recent ecmascript version
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+		"strictNullChecks": true,
+		"strict": true,
+		"declaration": true,
+		"allowSyntheticDefaultImports":true,
+        "noEmitHelpers": false,
+		"paths": {
+			"jquery": ["../node_modules/@types/jquery/dist/"],
+            "js-cookie": ["../node_modules/@types/js-cookie/"]
+		}
+    },
+    "exclude": ["./rollup.config.js"]
+}

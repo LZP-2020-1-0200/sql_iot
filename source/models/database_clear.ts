@@ -1,0 +1,5 @@
+
+import {clearDB} from '.';
+
+clearDB();
+

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Experiment control panel</title>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+</head>
+<body>
+    <div>
+        <h1>Samples</h1>
+        <div id="sampleList"></div>
+    </div>
+    <div id="addSample">
+        <h2>Add sample</h2>
+        <form action="/add_sample" method="post">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="addSample_name" placeholder="Sample name" required><br>
+            <label for="description">Description</label><br>
+            <textarea name="description" id="addSample_description" placeholder="Long sample description" required></textarea><br>
+            
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div>
+        <h1>Experiments</h1>
+        <div id="experimentList"></div>
+    </div>
+    <div id="addExperiment">
+        <h2>Add experiment</h2>
+        <form action="/add_experiment" method="post">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="addExperiment_name" placeholder="Experiment name" required><br>
+            <label for="medium">Medium</label>
+            <input type="text" name="medium" id="addExperiment_medium" placeholder="Medium" required><br>
+            <label for="mode">Mode</label>
+            <input type="text" name="mode" id="addExperiment_mode" placeholder="Mode" required><br>
+            <input type="number" name="sampleId" id="addExperiment_sampleId" hidden><br>
+            
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+        var SELECTED_SAMPLE=<%= sample %>
+    </script>
+    <script src="/js/control_panel.js"></script>
+</body>
+</html>
