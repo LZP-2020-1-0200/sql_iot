@@ -3,7 +3,6 @@ import { AllowNull, AutoIncrement, BelongsTo, Column, ForeignKey, Model, Primary
 import { Experiment } from "./Experiment.js";
 import { Point } from "./Point.js";
 
-
 interface MeasurementAttributes{
 	id:number;
 	experimentId:number;

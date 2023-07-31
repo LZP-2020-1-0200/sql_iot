@@ -5,6 +5,9 @@ import { Point, Pointset, Sample } from '../models/index.js';
 import type { PointData, calibrationSet } from '../lib/coordinate.js';
 export const pointsetController = express.Router();
 
+/**
+ * Displays the pointset page for a specific sample
+ */
 pointsetController.get('/:sampleId(\\d+)', async(req, res) => {
 	const sampleId = Number(req.params.sampleId);
 	const sample = await Sample.findByPk(sampleId, {include:[Pointset], attributes:['id']});
@@ -13,16 +16,20 @@ pointsetController.get('/:sampleId(\\d+)', async(req, res) => {
 	}else{
 		res.render('pointset/', {sample});
 	}
-
 });
 
+/**
+ * Displays the add pointset page for a specific sample
+ */
 pointsetController.get('/:sampleId/add', async (req, res) => {
 	const sampleId = Number(req.params.sampleId);
 	const sample = await Sample.findByPk(sampleId);
 	res.render('pointset/add', {sample});
 });
 
-
+/**
+ * The expected form data for adding a pointset
+ */
 interface pointsetAddForm {
 	name: string;
 	description: string;
@@ -37,6 +44,11 @@ interface pointsetAddForm {
 	calCz: number;
 }
 
+/**
+ * Type guard for pointsetAddForm
+ * @param x the object to check
+ * @returns true if the object is a pointsetAddForm
+ */
 function isPointsetAddForm(x: unknown): x is pointsetAddForm {
 	let o = true;
 	if( typeof x !== 'object') return false;
@@ -58,6 +70,11 @@ function isPointsetAddForm(x: unknown): x is pointsetAddForm {
 	return o;
 }
 
+/**
+ * Converts the form data to a calibrationSet
+ * @param pts the form data
+ * @returns Calibration point values as a structured object
+ */
 function constructCali(pts: pointsetAddForm): calibrationSet{
 	const cali: calibrationSet={
 		'A': {
@@ -79,6 +96,10 @@ function constructCali(pts: pointsetAddForm): calibrationSet{
 	return cali;
 }
 
+/**
+ * Adds a pointset to a sample.
+ * Redirects to the pointset edit page
+ */
 pointsetController.post('/:sampleId(\\d+)/add', async (req, res) => {
 	//res.send(req.body);
 	if(isPointsetAddForm(req.body)){
@@ -99,7 +120,12 @@ pointsetController.post('/:sampleId(\\d+)/add', async (req, res) => {
 	res.redirect('back');
 });
 
-function findBounds(...pts: PointData[]){
+/**
+ * Locates the outer bounds of a set of points
+ * @param pts The array of points to find the bounds of
+ * @returns The min and max points
+ */
+function findBounds(...pts: PointData[]): {min: PointData; max: PointData} {
 	const bounds: {min: PointData; max: PointData} = {
 		min: {
 			x: 9999999,
@@ -123,30 +149,36 @@ function findBounds(...pts: PointData[]){
 	return bounds;
 }
 
+/**
+ * Displays the edit pointset page for a specific pointset
+ */
 pointsetController.get('/:pointsetId/edit', async (req, res) => {
 	const ptsId = Number(req.params.pointsetId);
 	console.log(ptsId);
-	if(!isNaN(ptsId)){
-		const pointSet = await Pointset.findByPk(ptsId, {include: [Point]});
-		if(pointSet !== null && pointSet.points !== undefined){
-			const bounds = findBounds(
-				...pointSet.points,
-				pointSet.calibration.A,
-				pointSet.calibration.B,
-				pointSet.calibration.C);
-			const radius = 0.01;
-			console.log(bounds);
-			res.render('pointset/edit', {pointSet, bounds, radius});
-			return;
-		}else{
-			res.sendStatus(404);
-			return;
-		}
+	if(isNaN(ptsId)){
+		res.sendStatus(404);
+		return;
+	}
+	const pointSet = await Pointset.findByPk(ptsId, {include: [Point]});
+	if(pointSet !== null && pointSet.points !== undefined){
+		const bounds = findBounds(
+			...pointSet.points,
+			pointSet.calibration.A,
+			pointSet.calibration.B,
+			pointSet.calibration.C);
+		const radius = 0.01;
+		console.log(bounds);
+		res.render('pointset/edit', {pointSet, bounds, radius});
+		return;
 	}else{
 		res.sendStatus(404);
+		return;
 	}
 });
 
+/**
+ * Endpoint for editing a pointset
+ */
 pointsetController.put('/:pointsetId/edit', async (req, res) => {
 	if(isPointsetAddForm(req.body)){
 		const pointset = await Pointset.findByPk(req.params.pointsetId);

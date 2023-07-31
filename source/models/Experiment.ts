@@ -5,7 +5,9 @@ import { JSONValue } from "../config.js";
 
 
 
-
+/**
+ * The attributes of an experiment
+ */
 export interface ExperimentAttributes{
 	id: number;
 	name: string;

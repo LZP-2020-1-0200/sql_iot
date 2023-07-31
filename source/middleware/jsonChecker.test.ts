@@ -5,6 +5,7 @@ import assert from "node:assert";
 import request from 'supertest';
 
 test('jsonChecker middleware', async () => {
+	// make a mock express app
 	const app = express();
 	app.use(express.json());
 	app.get('/', jsonCheck, (req, res) => {

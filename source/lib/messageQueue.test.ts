@@ -73,5 +73,5 @@ test('MessageQueue', async (tctx) => {
 		assert(queue.getId()===2);
 		timeMock.mock.mockImplementation(()=> startDate + queue.timeout*2+1);
 		assert(queue.getId()===0);
-	});	
+	});
 });

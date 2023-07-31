@@ -15,8 +15,12 @@ router.get('/:lastId(\\d+)?', (req, res)=>{
 	res.render('messageQueue/monitor',{lastId:lId, reloadTime: config.monitorReloadTime});
 });
 
+/**
+ * Fetches the latest messages
+ * If lastId is specified, 
+ * only messages with an id greater than lastId will be returned
+ */
 router.get('/list/:lastId(\\d+)?', (req, res)=>{
-	console.log("listins");
 	const lId: number = (req.params.lastId)?Number(req.params.lastId):0;
 	const msgs = [...mainQueue.messagesSinceId(lId, 'all')];
 	res.render('messageQueue/list',{messages:msgs});

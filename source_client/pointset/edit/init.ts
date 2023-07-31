@@ -9,6 +9,9 @@ export let ptRadius: number;
 
 export const afterInit: Array<() => void> = [];
 
+/**
+ * Initializes variables for the page from the server's data
+ */
 export function init(setId: number, pts: {A: PointData; B: PointData; C: PointData}, ptR: number) {
 	ptRadius = ptR;
 	$('#selection').hide();

@@ -1,3 +1,8 @@
+/**
+ * Contains drawing mode functions and event listeners
+ * to make drawing lines be functional
+ */
+
 import $ from 'jquery';
 import { DRAG_MODE, dragMode } from './drag_mode.js';
 import * as mouse from './edit_select_events.js';
@@ -5,19 +10,36 @@ import type { PointData } from '../pointSet.js';
 import { id, ptRadius } from './init.js';
 import { lastPoint } from './loc_update.js';
 
+/**
+ * The start point of the line
+ */
 let start: PointData = {x: 0, y: 0, z: 0};
+
+/**
+ * The end point of the line
+ */
 let end: PointData = {x: 0, y: 0, z: 0};
 
+/**
+ * The number of points to generate along the line
+ */
 let pointCount: number;
 
+/**
+ * Redraws the circles in the preview
+ */
 function redrawCircles(){
 	const previewGroup = $<SVGGElement>('#previewCircles');
 	previewGroup.empty();
+
+	// Get the iteration step between the start and end points
 	const delta: PointData = {
 		x: (end.x - start.x)/(pointCount-1),
 		y: (end.y - start.y)/(pointCount-1),
 		z: (end.z - start.z)/(pointCount-1)
 	};
+
+	// Draw the circles
 	for(let d = 0; d < pointCount; d++){
 		const circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
 		const circlesvg = $<SVGCircleElement>(circle);
@@ -62,8 +84,14 @@ $('#ptCanvas').on('mouseup', () => {
 	redrawCircles();
 });
 
+// set the default number of points
 $('#lineCount').val(2);
 
+/**
+ * When the number of points is changed,
+ * check if it is valid and
+ * update the preview
+ */
 $('#lineCount').on('change', () => {
 	const c = Number($('#lineCount').val());
 	if(isNaN(c) || c<2){
@@ -73,6 +101,9 @@ $('#lineCount').on('change', () => {
 	redrawCircles();
 });
 
+/**
+ * manually set the start point
+ */
 $('#lineStartBtn').on('click', () => {
 	start = lastPoint;
 	$('#drawieLine').attr('x1', start.x);
@@ -80,6 +111,9 @@ $('#lineStartBtn').on('click', () => {
 	redrawCircles();
 });
 
+/**
+ * manually set the end point
+ */
 $('#lineEndBtn').on('click', () => {
 	end = lastPoint;
 	$('#drawieLine').attr('x2', end.x);
@@ -87,6 +121,12 @@ $('#lineEndBtn').on('click', () => {
 	redrawCircles();
 });
 
+/**
+ * Send the generated points to the server
+ * and reload the page to show the new points
+ * in the pointset
+ * TODO: make this not reload the page
+ */
 $('#lineCreateBtn').on('click', async () => {
 	const delta: PointData = {
 		x: (end.x - start.x)/(pointCount-1),

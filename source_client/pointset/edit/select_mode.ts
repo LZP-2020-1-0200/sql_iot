@@ -76,6 +76,7 @@ $('g').on('click', (e) => {
 	console.log(selected);
 });
 
+// send request to disable selected points
 $('#disableButton').on('click', async () => {
 	console.log(await fetch(`/pt/${id}/edit`, {
 		method: 'PUT',
@@ -87,6 +88,7 @@ $('#disableButton').on('click', async () => {
 	location.reload();
 });
 
+// send request to enable selected points
 $('#enableButton').on('click', async () => {
 	console.log(await fetch(`/pt/${id}/edit`, {
 		method: 'PUT',

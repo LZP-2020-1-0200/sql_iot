@@ -8,9 +8,6 @@ import {mainQueue} from '../lib/messageQueue.js';
 import {router as monitorRouter} from './messageQueue.monitor.js';
 
 
-//mainQueue.addMessage('test', {payload: "idfk"});
-
-
 // adds a message with topic to the messageQueue
 router.post('add/:topic',(req, res)=>{
 	if(req.is('json')){
@@ -23,7 +20,6 @@ router.post('add/:topic',(req, res)=>{
 
 // retrieves messages since lastId for a topic
 router.get('/get/:topic/:lastId(\\d*)',(req, res)=>{
-	// converts 
 	const lastId = Number(req.params.lastId);
 	const messages : MessagePayload[] = [...mainQueue.messagesSinceId(lastId, [req.params.topic])];
 	const queueLastMessage = mainQueue.getId();
@@ -32,9 +28,11 @@ router.get('/get/:topic/:lastId(\\d*)',(req, res)=>{
 	res.send(response);
 });
 
+// fetches the latest stage location
 router.get('/get/location', async (req, res) => {
 	const pt = await mainQueue.locationUpdate();
 	res.json(pt);
 });
 
+// redirects to the monitor
 router.use('/monitor',monitorRouter);
