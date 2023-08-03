@@ -49,6 +49,66 @@ pointController.post('/:pointsetId/add', async (req, res) => {
 
 });
 
+
+/**
+ * Endpoint for adding a point to a pointset
+ */
+pointController.post('/:pointsetId/bulkadd', async (req, res) => {
+	// check if the pointset exists
+	const ptset = await Pointset.findByPk(req.params.pointsetId);
+	if(ptset === null) {
+		res.sendStatus(400);
+		return;
+	}
+
+	// body should be an array of points
+	if(!Array.isArray(req.body)) {
+		res.sendStatus(400);
+		return;
+	}
+
+	// check if all array elements are points
+	for(const elem of req.body) {
+		if(!('x' in elem && 'y' in elem && 'z' in elem)) {
+			res.sendStatus(400);
+			return;
+		}
+		const pt = {
+			x: Number(elem.x),
+			y: Number(elem.y),
+			z: Number(elem.z)
+		};
+		if(isNaN(pt.x) || isNaN(pt.y) || isNaN(pt.z)) {
+			res.sendStatus(400);
+			return;
+		}
+	}
+
+	// add all the points
+	const maxNumPoint = await Point.findOne({
+		where: {
+			pointsetId: ptset.id
+		},
+		order: [['pointNumber', 'DESC']]
+	});
+	console.log(maxNumPoint);
+	const maxNum = (maxNumPoint?.pointNumber) ?? 0;
+	for(let i=0; i<req.body.length; i++) {
+		const elem = req.body[i];
+		await Point.create({
+			pointsetId: ptset.id,
+			pointNumber: maxNum + 1 + i,
+			x: elem.x,
+			y: elem.y,
+			z: elem.z
+		});
+	}
+
+	res.sendStatus(200);
+	return;
+	
+});
+
 function isnumarr(x: unknown[]): x is number[] {
 	let good = true;
 	x.forEach(elem => {
