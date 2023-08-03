@@ -7,6 +7,7 @@ export { transformMatrix } from './edit/loc_update.js';
 import './edit/select_mode.js';
 import './edit/draw_mode.js';
 import './edit/drag_mode.js';
+import './edit/point_mode.js';
 
 
 // updates pointset data
@@ -35,19 +36,6 @@ $("#updateForm").on('submit', async (e) => {
 	return false;
 });
 
-
-$('input[name=pointmode]').on('change', () => {
-	const val = $('input[name=pointmode]:checked').val();
-	if (val !== undefined && typeof val === 'string') {
-		$('#singleDiv').hide();
-		$('#lineDiv').hide();
-		$('#rectangleDiv').hide();
-		$(`#${val}Div`).show();
-	}else{
-		alert("Something has gone wrong");
-	}
-});
-
 // disables text selection in svg
 $('#txt text').on('mousedown', () => { return false; });
 
@@ -56,6 +44,9 @@ $(() => {
 	generateCalibrationEvents();
 	locationUpdateLoop();
 	updateLocals();
+	$('#singleDiv').show();
+	$('#lineDiv').hide();
+	$('#rectangleDiv').hide();
 });
 
 // sends the new point to the server, then reloads the page

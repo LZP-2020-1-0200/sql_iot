@@ -63,3 +63,20 @@ export async function set_cal(x: HTMLInputElement, y: HTMLInputElement, z: HTMLI
 export function set_cal_cookie(t: 'a' | 'b' | 'c', pt: PointData) {
 	Cookie.set(t as string, JSON.stringify(pt));
 }
+
+export function dot(a: PointData, b: PointData): number {
+	return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
+export function len(a: PointData): number {
+	return Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+}
+
+export function unit(a: PointData): PointData {
+	const l = len(a);
+	return {
+		x: a.x/l,
+		y: a.y/l,
+		z: a.z/l
+	};
+}

@@ -2,6 +2,10 @@
 	border: 3px solid black;
 } 
 
+body {
+	padding-bottom: 5vh;
+}
+
 .svgtxt{
 	-webkit-touch-callout: none;
 	-webkit-user-select:none;
@@ -28,4 +32,12 @@ g.selectedPt {
 	text {
 		fill: gray;
 	}
+}
+
+.point text {
+	fill: lightgray;
+}
+
+svg {
+	max-height: 80vh;
 }
