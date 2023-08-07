@@ -1,8 +1,8 @@
 node_modules
 .vscode
 .mypy_cache
-build
-static/bundles
-**/__pycache__
-secrets/**
+server/build
+server/static/bundles
+**/__pycache__/
+server/secrets/**
 .env*
