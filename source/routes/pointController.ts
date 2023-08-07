@@ -109,7 +109,7 @@ pointController.post('/:pointsetId/bulkadd', async (req, res) => {
 	
 });
 
-function isnumarr(x: unknown[]): x is number[] {
+export function isnumarr(x: unknown[]): x is number[] {
 	let good = true;
 	x.forEach(elem => {
 		good &&= (elem !== null && elem !== undefined && typeof elem === 'number');
