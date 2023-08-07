@@ -1,5 +1,6 @@
 import * as toml from 'toml';
 import fs from 'fs';
+import 'dotenv/config';
 
 export type JSONValue =
     | string
@@ -14,7 +15,7 @@ export const server = config.server as {
 	port: number;
 };
 
-config.database.password = fs.readFileSync(config.database.passwordFile, 'utf-8');
+config.database.password = process.env.DB_PASS ?? '';
 
 export const database = config.database as {
 	name: string;

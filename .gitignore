@@ -5,3 +5,4 @@ build
 static/bundles
 **/__pycache__
 secrets/**
+.env*
