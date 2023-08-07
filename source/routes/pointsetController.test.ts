@@ -59,4 +59,37 @@ test('pointset form validation', async (tstctx) => {
 		};
 		assert(isPointsetAddForm(form3)===false);
 	});
+
+	// check invalid form, coords are undefined
+	await tstctx.test('invalid form, coords are undefined', async () => {
+		const form4: unknown = {
+			name: 'test',
+			description: 'test',
+		};
+		assert(isPointsetAddForm(form4)===false);
+	});
+
+	// check invalid form, coords are null
+	await tstctx.test('invalid form, coords are null', async () => {
+		const form5: unknown = {
+			name: 'test',
+			description: 'test',
+			calAx: null,
+			calAy: null,
+			calAz: null,
+			calBx: null,
+			calBy: null,
+			calBz: null,
+			calCx: null,
+			calCy: null,
+			calCz: null
+		};
+		assert(isPointsetAddForm(form5)===false);
+	});
+
+	// check invalid form, form is not an object
+	await tstctx.test('invalid form, form is not an object', async () => {
+		const form6: unknown = 1;
+		assert(isPointsetAddForm(form6)===false);
+	});
 });
