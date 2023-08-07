@@ -266,25 +266,6 @@ $('#lineEndBtn').on('click', () => {
 // WONTFIX: make this not reload the page (would require a lot of refactoring and add extra points of failure)
 
 $('#lineCreateBtn, #rectangleCreateBtn').on('click', async () => {
-	/*const delta: PointData = {
-		x: (end.x - start.x)/(pointCount-1),
-		y: (end.y - start.y)/(pointCount-1),
-		z: (end.z - start.z)/(pointCount-1)
-	};
-	for(let d = 0; d < pointCount; d++){
-		const pt: PointData = {
-			x: start.x + delta.x * d,
-			y: start.y + delta.y * d,
-			z: start.z + delta.z * d
-		};
-		await fetch(`/pt/${id}/add`, {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(pt)
-		});
-	}*/
 	await fetch(`/pt/${id}/bulkadd`, {
 		method: 'POST',
 		headers: {
