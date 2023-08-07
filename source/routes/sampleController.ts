@@ -22,7 +22,7 @@ sampleController.get('/add',(req, res)=>{
 	res.render('sample/add');
 });
 
-interface SampleForm{
+export interface SampleForm{
 	name:string;
 	description:string;
 }
@@ -32,9 +32,10 @@ interface SampleForm{
  * @param obj the object to check
  * @returns true if the object is a SampleForm
  */
-function isSampleForm(obj: unknown): obj is SampleForm {
+export function isSampleForm(obj: unknown): obj is SampleForm {
 	if(!(typeof obj === 'object' && obj !== null))return false;
 	if(!('name' in obj && typeof obj.name === 'string'))return false;
+	if(obj.name === '')return false;
 	if(!('description' in obj && typeof obj.description === 'string'))return false;
 	return true;
 }
