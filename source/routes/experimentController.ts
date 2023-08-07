@@ -53,3 +53,20 @@ experimentController.get('/item/:id', async (req, res) => {
 	}
 	res.render('experiment/item', {experiment});
 });
+
+/**
+ * Experiment edit page
+ */
+experimentController.get('/edit/:id', async (req, res) => {
+	const id = Number(req.params.id);
+	if(isNaN(id)){
+		res.sendStatus(404);
+		return;
+	}
+	const experiment = await Experiment.findByPk(id);
+	if(experiment === null){
+		res.sendStatus(404);
+		return;
+	}
+	res.render('experiment/edit', {experiment});
+});
