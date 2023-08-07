@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Experiment</title>
+		<link rel="stylesheet" href="/bundles/experiment/style.css">
+	</head>
+	<body>
+		<h1>Experiment</h1>
+		<p>Experiment page</p>
+		<table>
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% experiments.forEach(experiment => { %>
+					<%# Limit the description size to make previewing easier %>
+					<% const nonNullDesc = experiment.description?experiment.description:"";  %>
+					<% const description = nonNullDesc.length > 100 ? nonNullDesc.substring(0, 100) + "..." : nonNullDesc %>
+					<tr>
+						<td><div><%= experiment.name %></div></td>
+						<td><div><%= description %></div></td>
+						<td><div><a href="/experiments/item/<%= experiment.id %>">View</a></div></td>
+					</tr>
+				<% }); %>
+			</tbody>
+		</table>
+	</body>
+</html>

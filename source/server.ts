@@ -33,6 +33,9 @@ app.use('/points', pointsetController);
 import { pointController } from './routes/pointController.js';
 app.use('/pt', pointController);
 
+import { experimentController } from './routes/experimentController.js';
+app.use('/experiments', experimentController);
+
 // main page redirects to samples
 app.get('/', (req, res) => {res.redirect('/samples');});
 

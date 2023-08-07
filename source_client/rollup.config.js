@@ -37,5 +37,14 @@ export default [
 			format: 'es'
 		},
 		plugins: [scss({fileName: 'style.css'})].concat(plugins)
+	},
+	{
+		input: source+'/experiment/index.ts',
+		output: {
+			sourcemap: true,
+			file: output+'/experiment/index.js',
+			format: 'es'
+		},
+		plugins: [scss({fileName: 'style.css'})].concat(plugins)
 	}
 ];
