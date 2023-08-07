@@ -7,6 +7,8 @@
     <title>Point sets</title>
 </head>
 <body>
+    <h1><%- sample.name %></h1>
+    <p><%- sample.description %></p>
     <div>
         <% sample.pointsets.forEach(pointset => { %>
             <%- pointset.name %>  <a href="/points/<%= pointset.id %>/edit">Edit pointset</a>  <br>

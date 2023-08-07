@@ -9,7 +9,7 @@ export const pointsetController = express.Router();
  */
 pointsetController.get('/:sampleId(\\d+)', async(req, res) => {
 	const sampleId = Number(req.params.sampleId);
-	const sample = await Sample.findByPk(sampleId, {include:[Pointset], attributes:['id']});
+	const sample = await Sample.findByPk(sampleId, {include:[Pointset], attributes:['id', 'name', 'description']});
 	if(sample === null){
 		res.send("Invalid sample id");
 	}else{
@@ -54,6 +54,7 @@ function isPointsetAddForm(x: unknown): x is pointsetAddForm {
 	if( x === null) return false;
 	if(!('name' in x && typeof x.name === 'string')) return false;
 	if(!('description' in x && typeof x.description === 'string')) return false;
+	// iterate over all the calibration point coordinates
 	(['A', 'B', 'C'] as const).forEach(pt => {
 		(['x', 'y', 'z'] as const).forEach(coord => {
 			const v:`cal${typeof pt}${typeof coord}` = `cal${pt}${coord}`;
@@ -176,7 +177,7 @@ pointsetController.get('/:pointsetId/edit', async (req, res) => {
 });
 
 /**
- * Endpoint for editing a pointset
+ * Endpoint for editing a pointset's name, description, or calibration points
  */
 pointsetController.put('/:pointsetId/edit', async (req, res) => {
 	if(isPointsetAddForm(req.body)){
