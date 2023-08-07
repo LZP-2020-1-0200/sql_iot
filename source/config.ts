@@ -14,6 +14,8 @@ export const server = config.server as {
 	port: number;
 };
 
+config.database.password = fs.readFileSync(config.database.passwordFile, 'utf-8');
+
 export const database = config.database as {
 	name: string;
 	username: string;

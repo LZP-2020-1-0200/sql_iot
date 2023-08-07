@@ -5,8 +5,8 @@ port = 80
 
 [database]
 name = "sts_db"
-username = "ST_server"
-password = "$*wY700O6^4$l2"
+username = "ST_server_"
+passwordFile = "secrets/db_pass"
 host = "localhost"
 
 [messageQueue]
