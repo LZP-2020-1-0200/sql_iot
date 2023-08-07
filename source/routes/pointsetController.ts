@@ -29,7 +29,7 @@ pointsetController.get('/:sampleId/add', async (req, res) => {
 /**
  * The expected form data for adding a pointset
  */
-interface pointsetAddForm {
+export interface pointsetAddForm {
 	name: string;
 	description: string;
 	calAx: number;
@@ -48,7 +48,7 @@ interface pointsetAddForm {
  * @param x the object to check
  * @returns true if the object is a pointsetAddForm
  */
-function isPointsetAddForm(x: unknown): x is pointsetAddForm {
+export function isPointsetAddForm(x: unknown): x is pointsetAddForm {
 	let o = true;
 	if( typeof x !== 'object') return false;
 	if( x === null) return false;
@@ -59,8 +59,8 @@ function isPointsetAddForm(x: unknown): x is pointsetAddForm {
 		(['x', 'y', 'z'] as const).forEach(coord => {
 			const v:`cal${typeof pt}${typeof coord}` = `cal${pt}${coord}`;
 			if(v in x){
-				// do a forced cast bc typescript too dumb
-				const x2 = x as unknown as Record<typeof v, unknown>;
+				const x2 = x as Record<typeof v | 'name' | 'description', unknown>;
+				if(typeof x2[v] !== 'number') o=false;
 				if(isNaN(Number(x2[v]))) o=false;
 			}else{
 				o = false;
@@ -97,13 +97,32 @@ function constructCali(pts: pointsetAddForm): calibrationSet{
 }
 
 /**
+ * Displays item page for a specific pointset
+ */
+pointsetController.get('/:pointsetId(\\d+)/item', async (req, res) => {
+	const ptsId = Number(req.params.pointsetId);
+	if(isNaN(ptsId)){
+		res.sendStatus(404);
+		return;
+	}
+	const pointSet = await Pointset.findByPk(ptsId, {include: [Point]});
+	if(pointSet !== null){
+		res.render('pointset/item', {pointSet});
+		return;
+	}else{
+		res.sendStatus(404);
+		return;
+	}
+});
+
+
+/**
  * Adds a pointset to a sample.
  * Redirects to the pointset edit page
  */
 pointsetController.post('/:sampleId(\\d+)/add', async (req, res) => {
 	//res.send(req.body);
 	if(isPointsetAddForm(req.body)){
-
 		const sample = await Sample.findByPk(req.params.sampleId);
 		if(sample !== null){
 			const nPointset = await Pointset.create({
@@ -113,7 +132,7 @@ pointsetController.post('/:sampleId(\\d+)/add', async (req, res) => {
 				calibration: constructCali(req.body)
 			});
 			res.cookie('lastPointsetId', nPointset.id);
-			res.redirect(`/points/${nPointset.id}/edit`);
+			res.redirect(`/points/${nPointset.id}/item`);
 			return;
 		}
 	}
