@@ -1,5 +1,5 @@
 import type { Optional } from "sequelize";
-import { Model, AllowNull, AutoIncrement, BelongsTo, Column, DataType, ForeignKey, PrimaryKey, Table } from "sequelize-typescript";
+import { Model, AllowNull, AutoIncrement, BelongsTo, Column, DataType, ForeignKey, PrimaryKey, Table, Default } from "sequelize-typescript";
 import { Pointset } from "./Pointset.js";
 import { JSONValue } from "../config.js";
 
@@ -35,6 +35,11 @@ export class Experiment extends Model<ExperimentAttributes, ExperimentInput>{
 
 	@Column
 	declare description: string;
+
+	@AllowNull(false)
+	@Default(false)
+	@Column(DataType.BOOLEAN)
+	declare started: boolean;
 
 	@Column(DataType.JSON)
 	declare data:JSONValue;
