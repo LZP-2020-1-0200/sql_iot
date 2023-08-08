@@ -1,4 +1,4 @@
-{
+export default{
     "root": true,
     "parser": "@typescript-eslint/parser",
     "plugins": [
@@ -13,6 +13,7 @@
     "parserOptions": {
       "ecmaVersion": "latest",
       "sourceType": "module",
+	  "tsconfigRootDir": __dirname + '/server',
       "project":["./source/tsconfig.json", "./source_client/tsconfig.json"]
     },
     "rules": {

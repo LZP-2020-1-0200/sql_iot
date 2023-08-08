@@ -1,12 +1,16 @@
-import { sys } from 'typescript';
-import {Measurement, Pointset, Sample,  sequelize} from '.';
+import ts from 'typescript';
+import { Sample } from './Sample.js';
+
 import { Point } from './Point.js';
 import { Experiment } from './Experiment.js';
+import { Pointset } from './Pointset.js';
+import { Measurement } from './Measurement.js';
+import { sequelize } from './index.js';
 
 // when launching this script, it runs through the sequelize models, constructing them in the process should they be non-functional
 // when launching with --seed, also seeds the database
 
-if(sys.args.includes("--seed")){
+if(ts.sys.args.includes("--seed")){
 	const x = async ()=>{
 		await sequelize.sync();
 		const sample = await Sample.create({
@@ -71,5 +75,6 @@ if(sys.args.includes("--seed")){
 	};
 	x().then(()=>console.log("Seeded."));
 }else{
-	console.log("Generated.");
+	sequelize.sync().then(()=>console.log("Synced."));
+	//console.log("Generated.");
 }
