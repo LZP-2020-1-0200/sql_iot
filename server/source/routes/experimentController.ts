@@ -40,7 +40,7 @@ experimentController.get('/:pointsetId?', async (req, res) => {
 /**
  * Experiment item page
  */
-experimentController.get('/item/:id', async (req, res) => {
+experimentController.get('/item/:id(\\d+)', async (req, res) => {
 	const id = Number(req.params.id);
 	if(isNaN(id)){
 		res.sendStatus(404);
@@ -57,7 +57,7 @@ experimentController.get('/item/:id', async (req, res) => {
 /**
  * Experiment edit page
  */
-experimentController.get('/edit/:id', async (req, res) => {
+experimentController.get('/edit/:id(\\d+)', async (req, res) => {
 	const id = Number(req.params.id);
 	if(isNaN(id)){
 		res.sendStatus(404);
@@ -71,12 +71,12 @@ experimentController.get('/edit/:id', async (req, res) => {
 	res.render('experiment/edit', {experiment});
 });
 
-interface ExperimentFormData {
+export interface ExperimentFormData {
 	name: string;
 	description: string;
 }
 
-function isExperimentFormData(arg: unknown): arg is ExperimentFormData {
+export function isExperimentFormData(arg: unknown): arg is ExperimentFormData {
 	if(typeof arg !== 'object' || arg === null){
 		return false;
 	}
@@ -93,7 +93,7 @@ function isExperimentFormData(arg: unknown): arg is ExperimentFormData {
 /**
  * Experiment edit submit
  */
-experimentController.post('/edit/:id', async (req, res) => {
+experimentController.post('/edit/:id(\\d+)', async (req, res) => {
 	if(!isExperimentFormData(req.body)){
 		res.sendStatus(400);
 		return;
@@ -112,4 +112,21 @@ experimentController.post('/edit/:id', async (req, res) => {
 	experiment.description = req.body.description;
 	await experiment.save();
 	res.redirect(`/experiment/item/${id}`);
+});
+
+/**
+ * Experiment start panel get
+ */
+experimentController.get('/start/:id(\\d+)', async (req, res) => {
+	const id = Number(req.params.id);
+	if(isNaN(id)){
+		res.sendStatus(404);
+		return;
+	}
+	const experiment = await Experiment.findByPk(id);
+	if(experiment === null){
+		res.sendStatus(404);
+		return;
+	}
+	res.render('experiment/start', {experiment});
 });

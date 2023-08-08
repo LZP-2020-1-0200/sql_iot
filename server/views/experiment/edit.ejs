@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><%- experiment.name %></title>
+	<%- include('../misc/bootstrap') %>
 </head>
 <body>
 	<form action="" method="post">
@@ -11,12 +12,11 @@
 		<input type="text" name="name" id="name" value="<%- experiment.name %>">
 		<br><br>
 		<label for="description">Description</label>
-		<br>
+		<br><br>
 		<textarea name="description" id="description" value="<%- experiment.description %>"></textarea>
-		<button type="submit">Submit</button>
-		<% if (!experiment.started) { %>
-			<form action="/experiments/<%= experiment.id %>/start" method="post"></form>
-		<% } %>
+		<br><br>
+		<button class="btn btn-primary" type="submit">Submit</button>
+		
 	</form>
 </body>
 </html>
