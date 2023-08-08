@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { Message, MessageQueue } from "./messageQueue.js";
+import { Message, MessageQueue, isInstrumentData } from "./messageQueue.js";
 import { test } from "node:test";
 import type { JSONValue } from "../config.js";
 
@@ -73,5 +73,135 @@ test('MessageQueue', async (tctx) => {
 		assert(queue.getId()===2);
 		timeMock.mock.mockImplementation(()=> startDate + queue.timeout*2+1);
 		assert(queue.getId()===0);
+	});
+});
+
+test('IsInstrumentData test', async (tctx) => {
+	// check valid object
+	await tctx.test('valid object', async () => {
+		assert(isInstrumentData({
+			priority: true,
+			name: 'name',
+			sequence: 0,
+			local_cal: [true, false, true],
+			dataset_cal: [true, false, true]
+		})===true);
+	});
+
+	// check invalid object, missing priority
+	await tctx.test('invalid object, missing priority', async () => {
+		assert(isInstrumentData({
+			name: 'name',
+			sequence: 0,
+			local_cal: [true, false, true],
+			dataset_cal: [true, false, true]
+		})===false);
+	});
+
+	// check invalid object, missing name
+	await tctx.test('invalid object, missing name', async () => {
+		assert(isInstrumentData({
+			priority: true,
+			sequence: 0,
+			local_cal: [true, false, true],
+			dataset_cal: [true, false, true]
+		})===false);
+	});
+
+	// check invalid object, missing sequence
+	await tctx.test('invalid object, missing sequence', async () => {
+		assert(isInstrumentData({
+			priority: true,
+			name: 'name',
+			local_cal: [true, false, true],
+			dataset_cal: [true, false, true]
+		})===false);
+	});
+
+	// check invalid object, missing local_cal
+	await tctx.test('invalid object, missing local_cal', async () => {
+		assert(isInstrumentData({
+			priority: true,
+			name: 'name',
+			sequence: 0,
+			dataset_cal: [true, false, true]
+		})===false);
+	});
+
+	// check invalid object, missing dataset_cal
+	await tctx.test('invalid object, missing dataset_cal', async () => {
+		assert(isInstrumentData({
+			priority: true,
+			name: 'name',
+			sequence: 0,
+			local_cal: [true, false, true]
+		})===false);
+	});
+
+	// check invalid object, properties wrong type
+	await tctx.test('invalid object, properties wrong type', async (tctx) => {
+		await tctx.test('priority', async () => {
+			assert(isInstrumentData({
+				priority: 'true',
+				name: 'name',
+				sequence: 0,
+				local_cal: [true, false, true],
+				dataset_cal: [true, false, true]
+			})===false);
+		});
+		await tctx.test('name', async () => {
+			assert(isInstrumentData({
+				priority: true,
+				name: 3,
+				sequence: 0,
+				local_cal: [true, false, true],
+				dataset_cal: [true, false, true]
+			})===false);
+		});
+		await tctx.test('sequence', async () => {
+			assert(isInstrumentData({
+				priority: true,
+				name: 'name',
+				sequence: '0',
+				local_cal: [true, false, true],
+				dataset_cal: [true, false, true]
+			})===false);
+		});
+		await tctx.test('local_cal', async (tctx) => {
+			assert(isInstrumentData({
+				priority: true,
+				name: 'name',
+				sequence: 0,
+				local_cal: 'data',
+				dataset_cal: [true, false, true]
+			})===false);
+			await tctx.test('local_cal array', async (tctx) => {
+				assert(isInstrumentData({
+					priority: true,
+					name: 'name',
+					sequence: 0,
+					local_cal: [true, false, 'true'],
+					dataset_cal: [true, false, true]
+				})===false);
+			});
+		});
+		await tctx.test('dataset_cal', async (tctx) => {
+			assert(isInstrumentData({
+				priority: true,
+				name: 'name',
+				sequence: 0,
+				local_cal: [true, false, true],
+				dataset_cal: 'data'
+			})===false);
+			await tctx.test('dataset_cal array', async (tctx) => {
+				assert(isInstrumentData({
+					priority: true,
+					name: 'name',
+					sequence: 0,
+					local_cal: [true, false, true],
+					dataset_cal: [true, undefined, false]
+				})===false);
+			});
+		});
 	});
 });

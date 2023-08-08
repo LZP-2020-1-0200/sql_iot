@@ -43,6 +43,47 @@ export class Message{
 	}
 }
 
+export interface InstrumentData{
+	"priority": boolean;
+	"name": string;
+	"sequence": number;
+	"local_cal": [boolean, boolean, boolean];
+	"dataset_cal": [boolean, boolean, boolean];
+}
+
+export function isInstrumentData(arg: unknown): arg is InstrumentData {
+	if(typeof arg !== 'object' || arg === null){
+		return false;
+	}
+	const obj = arg as Record<string, unknown>;
+	if(typeof obj.priority !== 'boolean'){
+		return false;
+	}
+	if(typeof obj.name !== 'string'){
+		return false;
+	}
+	if(typeof obj.sequence !== 'number'){
+		return false;
+	}
+	if(!Array.isArray(obj.local_cal) || obj.local_cal.length !== 3){
+		return false;
+	}
+	for(const x of obj.local_cal){
+		if(typeof x !== 'boolean'){
+			return false;
+		}
+	}
+	if(!Array.isArray(obj.dataset_cal) || obj.dataset_cal.length !== 3){
+		return false;
+	}
+	for(const x of obj.dataset_cal){
+		if(typeof x !== 'boolean'){
+			return false;
+		}
+	}
+	return true;
+};
+
 /**
  * The default timeout for the queue reset in milliseconds
  */
@@ -57,6 +98,14 @@ const locationUpdateFetchTimeout = 100;
  * of the motorized stage
  */
 const locationUpdateMaxTries = 20;
+
+/**
+ * Set time to wait for devices to update their status
+ * in milliseconds
+ * In this time, the ping message should be received by all devices,
+ * and they should have sent their status update
+ */
+const deviceUpdateWaitTime = 500;
 
 /**
  * A queue of messages that clients can post to and retrieve from.
@@ -119,6 +168,27 @@ export class MessageQueue{
 			await new Promise((resolve) => { setTimeout(resolve, locationUpdateFetchTimeout); });
 		}
 		return this.lastPoint;
+	}
+
+	/**
+	 * Asynchronously retrieves all connected devices by requesting
+	 * all devices to update their status
+	 * @returns a list of all connected devices
+	 */
+	async deviceUpdate(): Promise<InstrumentData[]>{
+		const id = this.getId();
+		// issue a ping to all devices
+		this.addMessage('instrument_ping',{});
+		const devices: InstrumentData[] = [];
+		// wait for all devices to update their status
+		await new Promise((resolve) => { setTimeout(resolve, deviceUpdateWaitTime); });
+		// retrieve all messages since the ping
+		for(const msg of this.messagesSinceId(id, 'instrument_status')){
+			if(isInstrumentData(msg.body)){
+				devices.push(msg.body);
+			}
+		}
+		return devices;
 	}
 
 	/**
