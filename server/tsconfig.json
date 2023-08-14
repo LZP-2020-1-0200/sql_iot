@@ -1,0 +1,16 @@
+{
+	"references": [
+		{
+			"path": "./source"
+		}
+	],
+	"files": [
+		"./source/server.ts"
+	],
+	"compilerOptions": {
+		"target": "es5",
+		"lib": ["es5", "dom"],
+    	"types": ["cypress", "node"],
+		"module": "ESNext",
+	},
+}

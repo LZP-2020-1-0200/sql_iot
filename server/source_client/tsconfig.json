@@ -14,7 +14,8 @@
 		"paths": {
 			"jquery": ["../node_modules/@types/jquery/dist/"],
             "js-cookie": ["../node_modules/@types/js-cookie/"]
-		}
+		},
+        "composite": true
     },
     "exclude": ["./rollup.config.js"]
 }
