@@ -6,3 +6,4 @@ server/static/bundles
 **/__pycache__/
 server/secrets/**
 .env*
+.rollup.cache
