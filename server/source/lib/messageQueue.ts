@@ -47,8 +47,8 @@ export interface InstrumentData{
 	"priority": boolean;
 	"name": string;
 	"sequence": number;
-	"local_cal": [boolean, boolean, boolean];
-	"dataset_cal": [boolean, boolean, boolean];
+	"local_cal"?: [boolean, boolean, boolean];
+	"dataset_cal"?: [boolean, boolean, boolean];
 }
 
 export function isInstrumentData(arg: unknown): arg is InstrumentData {
@@ -65,20 +65,24 @@ export function isInstrumentData(arg: unknown): arg is InstrumentData {
 	if(typeof obj.sequence !== 'number'){
 		return false;
 	}
-	if(!Array.isArray(obj.local_cal) || obj.local_cal.length !== 3){
-		return false;
-	}
-	for(const x of obj.local_cal){
-		if(typeof x !== 'boolean'){
+	if(obj.local_cal !== undefined) {
+		if(!Array.isArray(obj.local_cal) || obj.local_cal.length !== 3){
 			return false;
 		}
+		for(const x of obj.local_cal){
+			if(typeof x !== 'boolean'){
+				return false;
+			}
+		}
 	}
-	if(!Array.isArray(obj.dataset_cal) || obj.dataset_cal.length !== 3){
-		return false;
-	}
-	for(const x of obj.dataset_cal){
-		if(typeof x !== 'boolean'){
+	if(obj.dataset_cal !== undefined) {
+		if(!Array.isArray(obj.dataset_cal) || obj.dataset_cal.length !== 3){
 			return false;
+		}
+		for(const x of obj.dataset_cal){
+			if(typeof x !== 'boolean'){
+				return false;
+			}
 		}
 	}
 	return true;
@@ -92,12 +96,12 @@ const defaultTimeout=60*1000*5;
 /**
  * The timeout for the queue location update in milliseconds
  */
-const locationUpdateFetchTimeout = 100;
+export const locationUpdateFetchTimeout = 100;
 /**
  * The maximum number of times to try to retrieve the location
  * of the motorized stage
  */
-const locationUpdateMaxTries = 20;
+export const locationUpdateMaxTries = 20;
 
 /**
  * Set time to wait for devices to update their status
@@ -105,7 +109,7 @@ const locationUpdateMaxTries = 20;
  * In this time, the ping message should be received by all devices,
  * and they should have sent their status update
  */
-const deviceUpdateWaitTime = 500;
+const deviceUpdateWaitTime = 1000;
 
 /**
  * A queue of messages that clients can post to and retrieve from.
@@ -183,7 +187,8 @@ export class MessageQueue{
 		// wait for all devices to update their status
 		await new Promise((resolve) => { setTimeout(resolve, deviceUpdateWaitTime); });
 		// retrieve all messages since the ping
-		for(const msg of this.messagesSinceId(id, 'instrument_status')){
+		for(const msg of this.messagesSinceId(id, 'instrument_data')){
+			console.log(msg);
 			if(isInstrumentData(msg.body)){
 				devices.push(msg.body);
 			}
@@ -241,14 +246,13 @@ export class MessageQueue{
 	 */
 	addMessage(topic:string, body:JSONValue){
 		this.timeUpdate();
+		const message:Message = new Message(topic, structuredClone(body));
 		if(topic=='pointinfo'){
 			if(isPointData(body)){
 				this.lastPoint=body;
-				this.queue.push(new Message(topic, body));
 			}
-		}else{
-			this.queue.push(new Message(topic, body));
 		}
+		this.queue.push(message);
 	}
 }
 

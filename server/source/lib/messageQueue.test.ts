@@ -3,6 +3,7 @@ import { Message, MessageQueue, isInstrumentData } from "./messageQueue.js";
 import { test } from "node:test";
 import type { JSONValue } from "../config.js";
 
+
 test('Message packing', () => {
 	const dat: JSONValue = {x:54, "0":{data:[1,{c:"d"}]}};
 	const msg = new Message('testing123', dat);
@@ -74,6 +75,15 @@ test('MessageQueue', async (tctx) => {
 		timeMock.mock.mockImplementation(()=> startDate + queue.timeout*2+1);
 		assert(queue.getId()===0);
 	});
+
+	await tctx.test('Message editing prevention', () => {
+		const queue = new MessageQueue();
+		let msgBody = {x:3};
+		queue.addMessage('testA', msgBody);
+		msgBody.x = 4;
+		const msg = [...queue.messagesSinceId(0, 'testA')][0];
+		assert.deepStrictEqual(msg.body, {x:3});
+	});
 });
 
 test('IsInstrumentData test', async (tctx) => {
@@ -118,24 +128,24 @@ test('IsInstrumentData test', async (tctx) => {
 		})===false);
 	});
 
-	// check invalid object, missing local_cal
+	// check valid object, missing local_cal
 	await tctx.test('invalid object, missing local_cal', async () => {
 		assert(isInstrumentData({
 			priority: true,
 			name: 'name',
 			sequence: 0,
 			dataset_cal: [true, false, true]
-		})===false);
+		})===true);
 	});
 
-	// check invalid object, missing dataset_cal
+	// check valid object, missing dataset_cal
 	await tctx.test('invalid object, missing dataset_cal', async () => {
 		assert(isInstrumentData({
 			priority: true,
 			name: 'name',
 			sequence: 0,
 			local_cal: [true, false, true]
-		})===false);
+		})===true);
 	});
 
 	// check invalid object, properties wrong type

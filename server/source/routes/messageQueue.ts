@@ -34,5 +34,14 @@ router.get('/get/location', async (req, res) => {
 	res.json(pt);
 });
 
+router.get('/devices', async (req, res) => {
+	res.render('messageQueue/device_list');
+});
+
+router.get('/deviceTable', async (req, res) => {
+	const devices = await mainQueue.deviceUpdate();
+	res.render('messageQueue/device_list_table',{devices});
+});
+
 // redirects to the monitor
 router.use('/monitor',monitorRouter);
