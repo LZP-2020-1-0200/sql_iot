@@ -204,9 +204,16 @@ export class MessageQueue{
 		const now:number = Date.now();
 		const delta:number = now-this._lastAccess;
 		if(delta>this.timeout){
-			this.queue=[];
+			this.clear();
 		}
 		this._lastAccess=now;
+	}
+
+	/**
+	 * Clears the queue
+	 */
+	clear(){
+		this.queue=[];
 	}
 
 	/**

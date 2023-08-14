@@ -25,3 +25,15 @@ router.get('/list/:lastId(\\d+)?', (req, res)=>{
 	const msgs = [...mainQueue.messagesSinceId(lId, 'all')];
 	res.render('messageQueue/list',{messages:msgs});
 });
+
+router.get('/api/list/:lastId(\\d+)?', (req, res)=>{
+	const lId: number = (req.params.lastId)?Number(req.params.lastId):0;
+	const msgs = [...mainQueue.messagesSinceId(lId, 'all')];
+	res.json(msgs);
+});
+
+router.get('/api/list/topic/:topic/:lastId(\\d+)?', (req, res)=>{
+	const lId: number = (req.params.lastId)?Number(req.params.lastId):0;
+	const msgs = [...mainQueue.messagesSinceId(lId, [req.params.topic])];
+	res.json(msgs);
+});

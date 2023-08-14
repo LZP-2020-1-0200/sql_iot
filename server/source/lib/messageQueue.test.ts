@@ -84,6 +84,14 @@ test('MessageQueue', async (tctx) => {
 		const msg = [...queue.messagesSinceId(0, 'testA')][0];
 		assert.deepStrictEqual(msg.body, {x:3});
 	});
+
+	await tctx.test('Queue clearing', () => {
+		const queue = new MessageQueue();
+		queue.addMessage('testA', {x:3});
+		queue.addMessage('testB', {u:'asd'});
+		queue.clear();
+		assert.deepStrictEqual([...queue.messagesSinceId(0, 'all')], []);
+	});
 });
 
 test('IsInstrumentData test', async (tctx) => {
