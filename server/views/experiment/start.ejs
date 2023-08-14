@@ -13,6 +13,11 @@
 	<p>
 		<%- experiment.description %>
 	</p>
-	
+	<% if (!experiment.started) { %>
+		<form method="post" action="/experiments/start/<%= experiment.id %>">
+			<button class="btn btn-primary" type="submit">To experiment control panel</button>
+		</form>
+	<% } %>
+	<%- include('../messageQueue/device_list') %>
 </body>
 </html>

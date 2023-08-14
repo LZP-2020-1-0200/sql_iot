@@ -46,5 +46,14 @@ export default [
 			format: 'es'
 		},
 		plugins: [scss({fileName: 'style.css'})].concat(plugins)
+	},
+	{
+		input: source+'/deviceList/index.ts',
+		output: {
+			sourcemap: true,
+			file: output+'/deviceList.js',
+			format: 'es'
+		},
+		plugins: plugins
 	}
 ];

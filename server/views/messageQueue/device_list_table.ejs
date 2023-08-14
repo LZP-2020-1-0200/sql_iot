@@ -1,0 +1,18 @@
+<table>
+	<thead>
+		<tr>
+			<th>Device name</th>
+			<th>Has priority</th>
+			<th>Sequence number</th>
+		</tr>
+	</thead>
+	<tbody>
+		<% devices.forEach(device => { %>
+			<tr>
+				<td><%= device.name %></td>
+				<td><%= device.priority %></td>
+				<td><%= device.sequence %></td>
+			</tr>
+		<% }) %>
+	</tbody>
+</table>
