@@ -3,25 +3,26 @@ import time
 import requests
 
 latestId=requests.get(
-        'http://127.0.0.1:3000/retrieve',
+        'http://127.0.0.1:80/retrieve',
         params={'Id':str(0)},
         timeout=100
         ).json()["latestId"]
 while 1:
     r = requests.get(
-        'http://127.0.0.1:3000/retrieve',
+        'http://127.0.0.1:80/retrieve',
         params={'Id':str(latestId),"topics[]":["instrument_ping", "measure"]},
         timeout=100
         ).json()
     latestId=r["latestId"]
     if len(r["messages"])>0:
+        print(r["messages"])
         for msg in r["messages"]:
             if msg["topic"]=="instrument_ping":
                 requests.post(
-                    'http://127.0.0.1:3000',
+                    'http://127.0.0.1:80',
                     json={
                         "topic":"instrument_data",
-                        "message":
+                        "body":
                         {
                             "priority":False,
                             "sequence":1,
@@ -31,10 +32,10 @@ while 1:
                     timeout=100
                 )
                 requests.post(
-                    'http://127.0.0.1:3000',
+                    'http://127.0.0.1:80',
                     json={
                         "topic":"instrument_data",
-                        "message":
+                        "body":
                         {
                             "priority":True,
                             "sequence":4,
@@ -48,10 +49,10 @@ while 1:
                     print("simulating capture")
                     time.sleep(3)
                     requests.post(
-                        'http://127.0.0.1:3000',
+                        'http://127.0.0.1:80',
                         json={
                             "topic":"ready",
-                            "message":
+                            "body":
                             {
                                 "sequence":1,
                                 "name":"device A"
@@ -63,10 +64,10 @@ while 1:
                     print("simulating capture B")
                     time.sleep(3)
                     requests.post(
-                        'http://127.0.0.1:3000',
+                        'http://127.0.0.1:80',
                         json={
                             "topic":"ready",
-                            "message":
+                            "body":
                             {
                                 "sequence":4,
                                 "name":"device B"
@@ -74,4 +75,3 @@ while 1:
                         },
                         timeout=100
                     )
-    time.sleep(0.5)
