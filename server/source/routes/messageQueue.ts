@@ -9,7 +9,7 @@ import {router as monitorRouter} from './messageQueue.monitor.js';
 
 
 // adds a message with topic to the messageQueue
-router.post('add/:topic',(req, res)=>{
+router.post('/add/:topic',(req, res)=>{
 	if(req.is('json')){
 		mainQueue.addMessage(req.params.topic,req.body);
 		res.sendStatus(200);
