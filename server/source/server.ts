@@ -10,7 +10,6 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(express.static('static'));
-//var mysql      = require('mysql2');
 
 //dev url logger
 app.use((req, res, next)=>{
@@ -18,7 +17,7 @@ app.use((req, res, next)=>{
 	next();
 });
 
-
+// Router declarations
 
 // messageQueue route 
 import {router as msgQRouter} from './routes/messageQueue.js';
@@ -74,8 +73,6 @@ app.get('/retrieve', (req, res) => {
 		res.send(queueResponse);
 	}
 });
-
-
 
 
 const server=app.listen(port, () => {
