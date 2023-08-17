@@ -7,14 +7,13 @@ export const experimentController = express.Router();
  * Experiment index page
  */
 experimentController.get('/:pointsetId?', async (req, res) => {
+	let experiments;
 	// Fetch all experiments if no pointset is specified
 	// Otherwise, fetch all experiments that contain the specified pointset
 	if(req.params.pointsetId === undefined || req.params.pointsetId === null || req.params.pointsetId === ""){
-		const experiments = await Experiment.findAll({
+		experiments = await Experiment.findAll({
 			include: [Pointset]
 		});
-		res.render('experiment/index', {experiments});
-		return;
 	} else {
 		const pointsetId = Number(req.params.pointsetId);
 		if(isNaN(pointsetId)){
@@ -26,15 +25,14 @@ experimentController.get('/:pointsetId?', async (req, res) => {
 			res.sendStatus(404);
 			return;
 		}
-		const experiments = await Experiment.findAll({
+		experiments = await Experiment.findAll({
 			include: [Pointset],
 			where: {
 				pointsetId: pointsetId
 			}
 		});
-		res.render('experiment/index', {experiments});
-		return;
 	}
+	res.render('experiment/index', {experiments});
 });
 
 /**
