@@ -3,7 +3,7 @@ import assert from "node:assert";
 
 import { ExperimentFormData, isExperimentFormData } from "./experimentController.js";
 
-test('isExperimentFormData', async (tstctx) => {
+test('isExperimentFormData', {timeout: 1000}, async (tstctx) => {
 	// check valid object
 	await tstctx.test('valid object', async () => {
 		assert(isExperimentFormData({

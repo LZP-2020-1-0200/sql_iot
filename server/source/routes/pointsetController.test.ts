@@ -4,7 +4,7 @@ import type { pointsetAddForm } from "./pointsetController.js";
 import { isPointsetAddForm } from "./pointsetController.js";
 import assert from "node:assert";
 
-test('pointset form validation', async (tstctx) => {
+test('pointset form validation', {timeout: 1000}, async (tstctx) => {
 
 	// check valid form
 	await tstctx.test('valid form', async () => {

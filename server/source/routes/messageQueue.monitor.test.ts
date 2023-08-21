@@ -6,7 +6,7 @@ import request from "supertest";
 import { router } from "./messageQueue.monitor.js";
 import { mainQueue } from "../lib/messageQueue.js";
 
-test("GET /messageQueue/monitor/api/list", async (tctx) => {
+test("GET /messageQueue/monitor/api/list", {timeout: 1000}, async (tctx) => {
 	const app = express();
 	app.use(router);
 	await tctx.test('empty queue', async () => {

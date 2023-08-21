@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert";
 import { isnumarr } from "./pointController.js";
 
-test('isnumarray', async (tstctx) => {
+test('isnumarray', {timeout: 1000}, async (tstctx) => {
 	// check valid array
 	await tstctx.test('valid array', async () => {
 		assert(isnumarr([1,2,3,4,5])===true);

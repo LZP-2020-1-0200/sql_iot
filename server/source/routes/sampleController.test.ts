@@ -5,7 +5,7 @@ import assert from "node:assert";
 import { isSampleForm, type SampleForm } from "./sampleController.js";
 
 
-test('sample form validation', async (tstctx) => {
+test('sample form validation', {timeout: 1000}, async (tstctx) => {
 	
 	// check valid form
 	await tstctx.test('valid form', async () => {

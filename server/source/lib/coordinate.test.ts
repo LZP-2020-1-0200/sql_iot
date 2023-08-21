@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import { isPointData, PointData } from "./coordinate.js";
 
-describe('Is point data type guard', () => {
+describe('Is point data type guard', {timeout: 1000}, () => {
 	it('returns true for a valid point data object', () => {
 		assert(isPointData({
 			x: 0,

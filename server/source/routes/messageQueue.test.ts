@@ -5,13 +5,13 @@ import request from 'supertest';
 import { router } from './messageQueue.js';
 import { type MessagePayload, mainQueue } from '../lib/messageQueue.js';
 
-describe('device table endpoint', async () => {
+describe('device table endpoint', {timeout: 1000}, async () => {
 	const url = '/deviceTable';
 	it('calls deviceUpdate on the main queue ', async () => {
-		const updateMock = mock.fn(mainQueue.deviceUpdate, async ()=>{
+		const updateMock = mock.fn(mainQueue.getDevices, async ()=>{
 			return [];
 		});
-		mainQueue.deviceUpdate = updateMock;
+		mainQueue.getDevices = updateMock;
 		const app = express();
 		app.use(router);
 		app.use(express.json());
@@ -22,7 +22,7 @@ describe('device table endpoint', async () => {
 	});
 });
 
-describe('add topic endpoint', async () => {
+describe('add topic endpoint', {timeout: 1000}, async () => {
 	const url = '/add';
 	it('calls addTopic on the main queue ', async () => {
 		const addMessageMock = mock.fn(mainQueue.addMessage, async ()=>{
@@ -47,7 +47,7 @@ describe('add topic endpoint', async () => {
 	});
 });
 
-describe('get messages endpoint', async () => {
+describe('get messages endpoint', {timeout: 1000}, async () => {
 	it('calls messagesSinceId on the main queue ', async () => {
 		mainQueue.clear();
 		const msgMock = mock.method(mainQueue, 'messagesSinceId', function* () {
@@ -64,7 +64,7 @@ describe('get messages endpoint', async () => {
 	});
 });
 
-describe('get location endpoint', async () => {
+describe('get location endpoint', {timeout: 1000}, async () => {
 	it('calls locationUpdate on the main queue ', async () => {
 		const locMock = mock.method(mainQueue, 'locationUpdate', async ()=>{
 			return {x: 0, y: 0, z: 0};

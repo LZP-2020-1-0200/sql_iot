@@ -3,9 +3,9 @@ import { MessageQueue, locationUpdateFetchTimeout, locationUpdateMaxTries } from
 import { mock, test } from "node:test";
 import assert from "node:assert";
 
-test('MessageQueue timer sensitive tests', async (tctx) => {
+test('MessageQueue timer sensitive tests', {timeout: 1000}, async (tctx) => {
 	// check that the queue resets after the timeout
-	await tctx.test('Queue resetting timeouts', async () => {
+	await tctx.test('Queue resetting timeouts', {timeout: 1000}, async () => {
 		// set up timer fakes
 		const clock = FakeTimers.install();
 		const queue = new MessageQueue();
@@ -22,7 +22,7 @@ test('MessageQueue timer sensitive tests', async (tctx) => {
 	});
 
 	// message queue location update
-	await tctx.test('Queue location update', async (tctx) => {
+	await tctx.test('Queue location update', {timeout: 1000}, async (tctx) => {
 		await tctx.test('Timeout test', async () => {
 			// set up timer fakes
 			const clock = FakeTimers.install();
@@ -39,7 +39,7 @@ test('MessageQueue timer sensitive tests', async (tctx) => {
 			assert.deepEqual(point, initialPoint);
 		});
 
-		await tctx.test('Just in time', async () => {
+		await tctx.test('Just in time', {timeout: 1000}, async () => {
 			const waitTime = locationUpdateMaxTries*locationUpdateFetchTimeout;
 			// set up timer fakes
 			const clock = FakeTimers.install();
@@ -99,6 +99,39 @@ test('MessageQueue timer sensitive tests', async (tctx) => {
 
 			assert.deepStrictEqual(point, swappedPoint);
 			assert.notDeepStrictEqual(point, initialPoint);
+		});
+	});
+
+	await tctx.test('messagesSinceIdAsync', {timeout: 1000}, async (tctx) => {
+		await tctx.test('Works as sync queue', async () => {
+			const queue = new MessageQueue();
+			queue.addMessage('x', 'x');
+			queue.addMessage('y', 'y');
+			queue.addMessage('z', 'z');
+			const messages = queue.messagesSinceIdAsync(0, ['x', 'y', 'z']);
+			const returnal = [(await messages.next()).value, (await messages.next()).value, (await messages.next()).value];
+			assert.deepStrictEqual(returnal, [
+				{topic:'x', body: 'x'},
+				{topic:'y', body: 'y'},
+				{topic:'z', body: 'z'},
+			]);
+		});
+		await tctx.test('mixed order', async () => {
+			const queue = new MessageQueue();
+			queue.addMessage('x', 'x');
+			queue.addMessage('y', 'y');
+			console.log('added first messages');
+			const messages = queue.messagesSinceIdAsync(0, 'all');
+			const returnal = [(await messages.next()).value];
+			console.log('fetched first message');
+			queue.addMessage('z', 'z');
+			returnal.push((await messages.next()).value);
+			returnal.push((await messages.next()).value);
+			assert.deepStrictEqual(returnal, [
+				{topic:'x', body: 'x'},
+				{topic:'y', body: 'y'},
+				{topic:'z', body: 'z'},
+			]);
 		});
 	});
 });

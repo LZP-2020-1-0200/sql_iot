@@ -1,15 +1,128 @@
 
-import type { JSONValue } from '../config';
-import type { PointData} from './coordinate';
+import type { JSONValue } from '../config.js';
+import type { PointData, calibrationSet } from './coordinate.js';
 import { isPointData } from './coordinate.js';
-
 /**
  * The payload of a message
  */
-export type MessagePayload = {
+export interface MessagePayload {
 	topic: string;
 	body?: JSONValue;
-};
+}
+
+export type MeasureMessage = {
+	topic: 'measure';
+	body: {
+		point: PointData;
+		sequence: number;
+		pointNumber: number;
+		experimentId: number;
+	};
+}
+
+export type InstrumentPingMessage = {
+	topic: 'instrument_ping';
+	body: undefined;
+}
+
+export type InstrumentDataMessage = {
+	topic: 'instrument_data';
+	body: {
+		sequence: number;
+		name: string;
+		priority: boolean;
+		local_cal: [boolean, boolean, boolean];
+		dataset_cal: [boolean, boolean, boolean];
+	};
+}
+
+export type ReadyMessage = {
+	topic: 'ready';
+	body: {
+		sequence: number;
+		name: string;
+	};
+}
+
+// TODO: Add tests for isReadyMessage
+export function isReadyMessage(arg: unknown): arg is ReadyMessage {
+	if (typeof arg !== 'object' || arg === null) {
+		return false;
+	}
+	const obj = arg as ReadyMessage;
+	return obj.topic === 'ready' && 
+		typeof obj.body === 'object' && 
+		obj.body !== null && 
+		typeof obj.body.sequence === 'number' && 
+		typeof obj.body.name === 'string';
+}
+
+export type CalibrationMessage = {
+	topic: 'calibration';
+	body: calibrationSet;
+}
+
+export type PointInfoQMessage = {
+	topic: 'point_info?';
+	body: undefined;
+}
+
+export type PointInfoMessage = {
+	topic: 'point_info';
+	body: PointData;
+}
+
+export type SetLocalCalMessage = {
+	topic: 'set_local_calibration';
+	body: {
+		point:'A' | 'B' | 'C';
+	};
+}
+
+export type DataMoveMessage = {
+	topic: 'data_move';
+	body: PointData;
+}
+
+export type MoveMessage = {
+	topic: 'move';
+	body: PointData;
+}
+
+export type UncalibratedMessage = {
+	topic: 'uncalibrated';
+	body: {
+		name: string;
+		local: [boolean, boolean, boolean];
+		dataset: [boolean, boolean, boolean];
+	};
+}
+
+// TODO: Add tests for isUncalibratedMessage
+export function isUncalibratedMessage(arg: unknown): arg is UncalibratedMessage {
+	if (typeof arg !== 'object' || arg === null) {
+		return false;
+	}
+	const obj = arg as UncalibratedMessage;
+	return obj.topic === 'uncalibrated' &&
+		typeof obj.body === 'object' &&
+		obj.body !== null &&
+		typeof obj.body.name === 'string' &&	
+		Array.isArray(obj.body.local) &&
+		obj.body.local.length === 3 &&
+		typeof obj.body.local[0] === 'boolean' &&
+		typeof obj.body.local[1] === 'boolean' &&
+		typeof obj.body.local[2] === 'boolean' &&
+		Array.isArray(obj.body.dataset) &&
+		obj.body.dataset.length === 3 &&
+		typeof obj.body.dataset[0] === 'boolean' &&
+		typeof obj.body.dataset[1] === 'boolean' &&
+		typeof obj.body.dataset[2] === 'boolean';
+}
+
+
+		
+
 
 /**
  * Response to a queue request
@@ -88,6 +201,7 @@ export function isInstrumentData(arg: unknown): arg is InstrumentData {
 	return true;
 };
 
+// TODO: Move constants to a config file or .env
 /**
  * The default timeout for the queue reset in milliseconds
  */
@@ -116,6 +230,8 @@ const deviceUpdateWaitTime = 1000;
  * Used as a way to communicate between the server and the clients.
  */
 export class MessageQueue{
+
+	//TODO: Refactor to use a dictionary of topics to queues
 	/**
 	 * The queue of messages
 	 */
@@ -179,7 +295,7 @@ export class MessageQueue{
 	 * all devices to update their status
 	 * @returns a list of all connected devices
 	 */
-	async deviceUpdate(): Promise<InstrumentData[]>{
+	async getDevices(): Promise<InstrumentData[]>{
 		const id = this.getId();
 		// issue a ping to all devices
 		this.addMessage('instrument_ping',{});
@@ -226,7 +342,7 @@ export class MessageQueue{
 	}
 
 	/**
-     * A generator that yields messages since the last received message
+     * A generator that yields messages since the last received message, ends when the queue is empty
      * @param id 
      * the id of the last received message
      * @param topics 
@@ -234,32 +350,82 @@ export class MessageQueue{
 	 * @returns {Generator<MessagePayload>} a generator that
 	 * yields messages since the last received message
      */
-	*messagesSinceId(id:number, topics:string[] | string | 'all'=[]): Generator<MessagePayload> {
+	*messagesSinceId(id:number, topics:string[] | string): Generator<MessagePayload> {
 		if(typeof topics=='string'){
 			topics=[topics];
 		}
-		this.timeUpdate();
 		for(let it=id;it<this.queue.length;it++){
 			if(topics.includes("all") || topics.includes(this.queue[it].topic)){
+				this.timeUpdate();
 				yield this.queue[it].data;
 			}
 		}
 	}
 
+	//TODO: Add tests for messagesSinceIdAsync
 	/**
-	 * Pushes a message to the queue
+	 * Asynchronously retrieves messages since the given id
+	 * if the queue is empty, waits until a message is received
+	 * this generator will never end
+	 * @param id
+	 * the id of the last received message
+	 * @param topics
+	 * a list of topics
+	 * 
+	 */
+	async *messagesSinceIdAsync(id:number, topics:string[] | string): AsyncGenerator<MessagePayload, never> {
+		if(typeof topics=='string'){
+			topics=[topics];
+		} else if (typeof topics == 'undefined') {
+			topics = ['all'];
+		}
+		let index = id;
+		while(true) {
+			if(index >= this.queue.length) {
+				// TODO: move timeout length to .env
+				await new Promise((resolve) => { setTimeout(resolve, 100); });
+				continue;
+			}
+			if(topics.includes("all") || topics.includes(this.queue[index].topic)){
+				this.timeUpdate();
+				yield this.queue[index].data;
+			}
+			index++;
+		}
+	}
+
+	/**
+	 * Pushes a message to the queue with topic+body
 	 * @param topic The topic of the message
 	 * @param body A JSON object containing the message body
 	 */
-	addMessage(topic:string, body:JSONValue){
+	private addMessageTB(topic:string, body:JSONValue | undefined) {
 		this.timeUpdate();
-		const message:Message = new Message(topic, structuredClone(body));
+		const message:Message = new Message(topic, (body === undefined) ? {} : structuredClone(body));
 		if(topic=='pointinfo'){
 			if(isPointData(body)){
 				this.lastPoint=body;
 			}
 		}
 		this.queue.push(message);
+	}
+
+	/**
+	 * Pushes a message to the queue with a MessagePayload
+	 * @param payload The message payload
+	 */
+	private addMessageP(payload: MessagePayload) {
+		this.addMessageTB(payload.topic, payload.body);
+	}
+
+	addMessage(topic: string, body: JSONValue): void;
+	addMessage(payload: MessagePayload): void;
+	addMessage(topicOrPayload: string | MessagePayload, body?: JSONValue) {
+		if(typeof topicOrPayload == 'string') {
+			this.addMessageTB(topicOrPayload, body);
+		} else {
+			this.addMessageP(topicOrPayload);
+		}
 	}
 }
 
