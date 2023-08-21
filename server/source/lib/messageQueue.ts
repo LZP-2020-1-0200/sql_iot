@@ -44,7 +44,6 @@ export type ReadyMessage = {
 	};
 }
 
-// TODO: Add tests for isReadyMessage
 export function isReadyMessage(arg: unknown): arg is ReadyMessage {
 	if (typeof arg !== 'object' || arg === null) {
 		return false;
@@ -98,7 +97,6 @@ export type UncalibratedMessage = {
 	};
 }
 
-// TODO: Add tests for isUncalibratedMessage
 export function isUncalibratedMessage(arg: unknown): arg is UncalibratedMessage {
 	if (typeof arg !== 'object' || arg === null) {
 		return false;
@@ -362,7 +360,6 @@ export class MessageQueue{
 		}
 	}
 
-	//TODO: Add tests for messagesSinceIdAsync
 	/**
 	 * Asynchronously retrieves messages since the given id
 	 * if the queue is empty, waits until a message is received

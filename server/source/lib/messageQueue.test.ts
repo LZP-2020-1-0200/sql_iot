@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { Message, MessageQueue, isInstrumentData } from "./messageQueue.js";
+import { Message, MessageQueue, ReadyMessage, UncalibratedMessage, isInstrumentData, isReadyMessage, isUncalibratedMessage } from "./messageQueue.js";
 import { test } from "node:test";
 import type { JSONValue } from "../config.js";
 
@@ -223,3 +223,224 @@ test('IsInstrumentData test', async (tctx) => {
 		});
 	});
 });
+
+test('isReadyMessage', {timeout: 1000}, async (tctx) => {
+	await tctx.test('valid object', async () => {
+		const msg: ReadyMessage = {
+			topic: "ready",
+			body: {
+				name: "test",
+				sequence: 0,
+			}
+		};
+		assert(isReadyMessage(msg)===true);
+	});
+
+	await tctx.test('invalid object, missing topic', async () => {
+		const msg: unknown = {
+			body: {
+				name: "test",
+				sequence: 0,
+			}
+		};
+		assert(isReadyMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, missing body', async () => {
+		const msg: unknown = {
+			topic: "ready",
+		};
+		assert(isReadyMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, missing name', async () => {
+		const msg: unknown = {
+			topic: "ready",
+			body: {
+				sequence: 0,
+			}
+		};
+		assert(isReadyMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, missing sequence', async () => {
+		const msg: unknown = {
+			topic: "ready",
+			body: {
+				name: "test",
+			}
+		};
+		assert(isReadyMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, properties wrong type', async (tctx) => {
+		await tctx.test('topic', async () => {
+			const msg: unknown = {
+				topic: 3,
+				body: {
+					name: "test",
+					sequence: 0,
+				}
+			};
+			assert(isReadyMessage(msg)===false);
+		});
+		await tctx.test('body', async () => {
+			const msg: unknown = {
+				topic: "ready",
+				body: 3
+			};
+			assert(isReadyMessage(msg)===false);
+		});
+		await tctx.test('name', async () => {
+			const msg: unknown = {
+				topic: "ready",
+				body: {
+					name: 3,
+					sequence: 0,
+				}
+			};
+			assert(isReadyMessage(msg)===false);
+		});
+		await tctx.test('sequence', async () => {
+			const msg: unknown = {
+				topic: "ready",
+				body: {
+					name: "test",
+					sequence: "0",
+				}
+			};
+			assert(isReadyMessage(msg)===false);
+		});
+	});
+
+	await tctx.test('topic not ready', async () => {
+		const msg: unknown = {
+			topic: "not ready",
+			body: {
+				name: "test",
+				sequence: 0,
+			}
+		};
+		assert(isReadyMessage(msg)===false);
+	});
+});
+
+test('isUncalibratedMessage', {timeout: 1000}, async (tctx) => {
+	await tctx.test('valid object', async () => {
+		const msg: UncalibratedMessage = {
+			topic: "uncalibrated",
+			body: {
+				name: "test",
+				dataset: [true, false, true],
+				local: [true, false, true]
+			}
+		};
+		assert(isUncalibratedMessage(msg)===true);
+	});
+
+	await tctx.test('invalid object, missing topic', async () => {
+		const msg: unknown = {
+			body: {
+				name: "test",
+				dataset: [true, false, true],
+				local: [true, false, true]
+			}
+		};
+		assert(isUncalibratedMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, missing body', async () => {
+		const msg: unknown = {
+			topic: "uncalibrated",
+		};
+		assert(isUncalibratedMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, missing name', async () => {
+		const msg: unknown = {
+			topic: "uncalibrated",
+			body: {
+				dataset: [true, false, true],
+				local: [true, false, true]
+			}
+		};
+		assert(isUncalibratedMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, missing dataset', async () => {
+		const msg: unknown = {
+			topic: "uncalibrated",
+			body: {
+				name: "test",
+				local: [true, false, true]
+			}
+		};
+		assert(isUncalibratedMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, missing local', async () => {
+		const msg: unknown = {
+			topic: "uncalibrated",
+			body: {
+				name: "test",
+				dataset: [true, false, true],
+			}
+		};
+		assert(isUncalibratedMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, properties wrong type', async (tctx) => {
+		await tctx.test('topic', async () => {
+			const msg: unknown = {
+				topic: 3,
+				body: {
+					name: "test",
+					dataset: [true, false, true],
+					local: [true, false, true]
+				}
+			};
+			assert(isUncalibratedMessage(msg)===false);
+		});
+		await tctx.test('body', async () => {
+			const msg: unknown = {
+				topic: "uncalibrated",
+				body: 3
+			};
+			assert(isUncalibratedMessage(msg)===false);
+		});
+		await tctx.test('name', async () => {
+			const msg: unknown = {
+				topic: "uncalibrated",
+				body: {
+					name: 3,
+					dataset: [true, false, true],
+					local: [true, false, true]
+				}
+			};
+			assert(isUncalibratedMessage(msg)===false);
+		});
+		await tctx.test('dataset', async () => {
+			const msg: unknown = {
+				topic: "uncalibrated",
+				body: {
+					name: "test",
+					dataset: 3,
+					local: [true, false, true]
+				}
+			};
+			assert(isUncalibratedMessage(msg)===false);
+		});
+		await tctx.test('local', async () => {
+			const msg: unknown = {
+				topic: "uncalibrated",
+				body: {
+					name: "test",
+					dataset: [true, false, true],
+					local: 3
+				}
+			};
+			assert(isUncalibratedMessage(msg)===false);
+		});
+	});
+});
+

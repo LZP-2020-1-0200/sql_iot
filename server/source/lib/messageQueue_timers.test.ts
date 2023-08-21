@@ -116,20 +116,78 @@ test('MessageQueue timer sensitive tests', {timeout: 1000}, async (tctx) => {
 				{topic:'z', body: 'z'},
 			]);
 		});
-		await tctx.test('mixed order', async () => {
+
+		await tctx.test('Mixed order', async () => {
 			const queue = new MessageQueue();
 			queue.addMessage('x', 'x');
 			queue.addMessage('y', 'y');
-			console.log('added first messages');
 			const messages = queue.messagesSinceIdAsync(0, 'all');
 			const returnal = [(await messages.next()).value];
-			console.log('fetched first message');
 			queue.addMessage('z', 'z');
 			returnal.push((await messages.next()).value);
 			returnal.push((await messages.next()).value);
 			assert.deepStrictEqual(returnal, [
 				{topic:'x', body: 'x'},
 				{topic:'y', body: 'y'},
+				{topic:'z', body: 'z'},
+			]);
+		});
+
+		await tctx.test('Time skipping', async () => {
+			const clock = FakeTimers.install();
+			const queue = new MessageQueue();
+			const generator = queue.messagesSinceIdAsync(0, 'all');
+			const returnal = [];
+			queue.addMessage('x', 'x');
+			queue.addMessage('y', 'y');
+			clock.tick(124000);
+			returnal.push((await generator.next()).value);
+			clock.tick(13000);
+			queue.addMessage('z', 'z');
+			clock.tick(1000);
+			returnal.push((await generator.next()).value);
+			clock.tick(1500);
+			returnal.push((await generator.next()).value);
+			assert.deepStrictEqual(returnal, [
+				{topic:'x', body: 'x'},
+				{topic:'y', body: 'y'},
+				{topic:'z', body: 'z'},
+			]);
+			clock.uninstall();
+		});
+
+		await tctx.test('Make generator wait', async () => {
+			const clock = FakeTimers.install();
+			const queue = new MessageQueue();
+			const generator = queue.messagesSinceIdAsync(0, 'all');
+			const returnal = [];
+			queue.addMessage('x', 'x');
+			queue.addMessage('y', 'y');
+			clock.tick(124000);
+			returnal.push((await generator.next()).value);
+			returnal.push((await generator.next()).value);
+			let promise = generator.next();
+			queue.addMessage('z', 'zx');
+			clock.tick(13000);
+			clock.runAll();
+			returnal.push((await promise).value);
+			assert.deepStrictEqual(returnal, [
+				{topic:'x', body: 'x'},
+				{topic:'y', body: 'y'},
+				{topic:'z', body: 'zx'},
+			]);
+			clock.uninstall();
+		});
+
+		await tctx.test('Filter test', async () => {
+			const queue = new MessageQueue();
+			queue.addMessage('x', 'x');
+			queue.addMessage('y', 'y');
+			queue.addMessage('z', 'z');
+			const messages = queue.messagesSinceIdAsync(0, ['x', 'z']);
+			const returnal = [(await messages.next()).value, (await messages.next()).value];
+			assert.deepStrictEqual(returnal, [
+				{topic:'x', body: 'x'},
 				{topic:'z', body: 'z'},
 			]);
 		});
