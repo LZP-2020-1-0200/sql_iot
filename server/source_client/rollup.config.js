@@ -55,5 +55,14 @@ export default [
 			format: 'es'
 		},
 		plugins: plugins
+	},
+	{
+		input: source+'/experiment_start/index.ts',
+		output: {
+			sourcemap: true,
+			file: output+'/experiment_start.js',
+			format: 'es'
+		},
+		plugins: plugins
 	}
 ];

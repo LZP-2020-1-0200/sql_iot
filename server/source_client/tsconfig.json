@@ -11,9 +11,13 @@
 		"declaration": true,
 		"allowSyntheticDefaultImports":true,
         "noEmitHelpers": false,
+        "moduleResolution": "NodeNext",
 		"paths": {
 			"jquery": ["../node_modules/@types/jquery/dist/"],
-            "js-cookie": ["../node_modules/@types/js-cookie/"]
+            "js-cookie": ["../node_modules/@types/js-cookie/"],
+            "socket.io-client": [
+                "../node_modules/@types/socket.io-client"
+            ],
 		},
         "composite": true
     },

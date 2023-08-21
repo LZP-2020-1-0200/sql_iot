@@ -39,7 +39,7 @@ router.get('/devices', async (req, res) => {
 });
 
 router.get('/deviceTable', async (req, res) => {
-	const devices = await mainQueue.deviceUpdate();
+	const devices = await mainQueue.getDevices();
 	res.render('messageQueue/device_list_table',{devices});
 });
 

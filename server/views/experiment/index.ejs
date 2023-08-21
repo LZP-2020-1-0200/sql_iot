@@ -13,6 +13,8 @@
 				<tr>
 					<th>Name</th>
 					<th>Description</th>
+					<th>Pointset</th>
+					<th>View</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -23,6 +25,7 @@
 					<tr>
 						<td><div><%= experiment.name %></div></td>
 						<td><div><%= description %></div></td>
+						<td><div><a href="points/<%= experiment.pointset.id %>/edit"><%= experiment.pointset.name %></a></div></td>
 						<td><div><a href="/experiments/item/<%= experiment.id %>">View</a></div></td>
 					</tr>
 				<% }); %>

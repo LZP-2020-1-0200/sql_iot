@@ -3,14 +3,16 @@
  * 
  */
 
+import { JSONValue } from "../config";
+
 
 /**
  * Contains the x, y, and z coordinates of a point
  */
-export interface PointData{
-	x:number;
-	y:number;
-	z:number;
+export type PointData = {
+	x: number;
+	y: number;
+	z: number;
 }
 
 /**
@@ -28,7 +30,7 @@ export function isPointData(x: unknown): x is PointData {
 /**
  * Contains the calibration points for a pointset
  */
-export interface calibrationSet{
+export type calibrationSet = {
 	A:PointData;
 	B:PointData;
 	C:PointData;
