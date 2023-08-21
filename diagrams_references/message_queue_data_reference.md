@@ -167,4 +167,12 @@ Stage-enabled instrument issued response used to signify that it is not ready to
 |`local`|`[bool,bool,bool]`|A list of 3 booleans denoting if local calibration points `A`, `B`, `C` are set.|
 |`dataset`|`[bool,bool,bool]`|A list of 3 booleans denoting if dataset calibration points `A`, `B`, `C` are set.|
 
+### `system_status?`
 
+Issued by anyone, particulary rebooted devices, not caught up with the system to not have to parse the entire queue.
+
+
+### `system_status`
+
+Issued in response to `system_status?`. Useful to get
+devices up to date with what is happening.
