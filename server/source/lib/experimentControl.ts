@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { InstrumentData, MeasureMessage, isInstrumentData, isReadyMessage, isUncalibratedMessage, mainQueue } from "./messageQueue.js";
+import { InstrumentData, MeasureMessage, isHaltExperimentMessage, isInstrumentData, isReadyMessage, isUncalibratedMessage, mainQueue } from "./messageQueue.js";
 import { Experiment, Point, Pointset } from "../models/index.js";
 import { PointData } from "./coordinate.js";
 
@@ -14,6 +14,8 @@ import { PointData } from "./coordinate.js";
  * nonCriticalError: At least one optional device has sent an uncalibrated message
  * 
  * criticalError: At least one mandatory device has sent an uncalibrated message
+ * 
+ * halted: The experiment has been halted
  */
 type SequenceResult = 
 {$: 'allReady';
@@ -24,15 +26,17 @@ type SequenceResult =
 } | 
 {$: 'criticalError';
 	uncalibratedDeviceName: string;
+} |
+{$: 'halted';
+
 };
 
 async function collectReadyMessages(sequence: number, requiredInstruments: InstrumentData[], queueStartId: number): Promise<SequenceResult> {
 	let queueid = queueStartId;
 	let devices = structuredClone(requiredInstruments);
-	let messageFetcher = mainQueue.messagesSinceIdAsync(queueStartId, ['ready', 'uncalibrated']);
+	let messageFetcher = mainQueue.messagesSinceIdAsync(queueStartId, ['ready', 'uncalibrated', 'halt_experiment']);
 	const uncalibratedDevices: string[] = [];
 	while(devices.length > 0){
-		// TODO: Consider adding a fallback break condition or kill switch
 		// fetch next message from queue
 		let msg = await messageFetcher.next();
 		const message = msg.value;
@@ -49,6 +53,10 @@ async function collectReadyMessages(sequence: number, requiredInstruments: Instr
 			} else {
 				uncalibratedDevices.push(message.body.name);
 			}
+		} else if (isHaltExperimentMessage(message)){
+			return {$: 'halted'};
+		} else {
+			console.error(`Unexpected message type/malformed message: ${JSON.stringify(message)}`);
 		}
 	}
 	if(uncalibratedDevices.length > 0){
@@ -125,6 +133,26 @@ export async function launchExperiment(experiment: Experiment, socket: Socket | 
 				} else {
 					console.warn(`Devices ${result.uncalibratedDeviceNames.join(', ')} are uncalibrated`);
 				}
+			} else if (result.$ === 'halted'){
+				if(socket !== null){
+					socket.emit('warning', `Experiment halted`);
+				} else {
+					console.warn(`Experiment halted`);
+				}
+				return;
+			} else if (result.$ === 'allReady'){
+				if(socket !== null){
+					socket.emit('info', {message: `All devices ready`, sequence: sequence, maxSequence: maxSequence});
+				} else {
+					console.info(`All devices ready`);
+				}
+			} else {
+				if (socket !== null) {
+					socket.emit('error', `Unexpected result from collectReadyMessages: ${JSON.stringify(result)}`);
+				} else {
+					console.error(`Unexpected result from collectReadyMessages: ${JSON.stringify(result)}`);
+				}
+				return;
 			}
 			sequence++;
 		}

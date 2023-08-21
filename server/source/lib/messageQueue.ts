@@ -118,6 +118,17 @@ export function isUncalibratedMessage(arg: unknown): arg is UncalibratedMessage 
 		typeof obj.body.dataset[2] === 'boolean';
 }
 
+export type HaltExperimentMessage = {
+	topic: 'halt_experiment';
+};
+
+export function isHaltExperimentMessage(arg: unknown): arg is HaltExperimentMessage {
+	if (typeof arg !== 'object' || arg === null) {
+		return false;
+	}
+	const obj = arg as HaltExperimentMessage;
+	return obj.topic === 'halt_experiment';
+}
 
 		
 

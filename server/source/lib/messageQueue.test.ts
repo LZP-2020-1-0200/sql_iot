@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { Message, MessageQueue, ReadyMessage, UncalibratedMessage, isInstrumentData, isReadyMessage, isUncalibratedMessage } from "./messageQueue.js";
+import { HaltExperimentMessage, Message, MessageQueue, ReadyMessage, UncalibratedMessage, isHaltExperimentMessage, isInstrumentData, isReadyMessage, isUncalibratedMessage } from "./messageQueue.js";
 import { test } from "node:test";
 import type { JSONValue } from "../config.js";
 
@@ -444,3 +444,33 @@ test('isUncalibratedMessage', {timeout: 1000}, async (tctx) => {
 	});
 });
 
+test('isHaltExperimentMessage', {timeout: 1000}, async (tctx) => {
+	await tctx.test('valid object', async () => {
+		const msg: HaltExperimentMessage = {
+			topic: "halt_experiment",
+		};
+		assert(isHaltExperimentMessage(msg)===true);
+	});
+
+	await tctx.test('invalid object, missing topic', async () => {
+		const msg: unknown = {
+		};
+		assert(isHaltExperimentMessage(msg)===false);
+	});
+
+	await tctx.test('invalid object, properties wrong type', async (tctx) => {
+		await tctx.test('topic', async () => {
+			const msg: unknown = {
+				topic: 3,
+			};
+			assert(isHaltExperimentMessage(msg)===false);
+		});
+	});
+
+	await tctx.test('wrong topic', async () => {
+		const msg: unknown = {
+			topic: "not halt_experiment",
+		};
+		assert(isHaltExperimentMessage(msg)===false);
+	});
+});
