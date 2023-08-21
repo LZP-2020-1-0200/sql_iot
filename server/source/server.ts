@@ -3,14 +3,19 @@ import bodyParser from 'body-parser';
 import type { MessagePayload, QueueResponse} from './lib/messageQueue.js';
 import { mainQueue } from './lib/messageQueue.js';
 import { server as config } from './config.js';
+import http from 'http';
+import { Server } from 'socket.io';
+import { websocketSetup } from './routes/websocket.messageQueue.js';
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+websocketSetup(io);
 const port = config.port;
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(express.static('static'));
-
 //dev url logger
 app.use((req, res, next)=>{
 	//console.log(req.url);
@@ -75,7 +80,7 @@ app.get('/retrieve', (req, res) => {
 });
 
 
-const server=app.listen(port, () => {
+server.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 });
 
