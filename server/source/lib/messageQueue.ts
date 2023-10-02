@@ -391,6 +391,7 @@ export class MessageQueue{
 		while(true) {
 			if(index >= this.queue.length) {
 				// TODO: move timeout length to .env
+				//console.log('waiting for message');
 				await new Promise((resolve) => { setTimeout(resolve, 100); });
 				continue;
 			}
