@@ -145,6 +145,7 @@ class STSClient:
         self._event_thread: threading.Thread = threading.Thread(
             target=self._event_thread_func
         )
+        self.last_heartbeat: int = int(time.time())
         self._sequence_num: int = sequence_number
         self._name: str = name
         self._priority: bool = priority
@@ -240,10 +241,13 @@ class STSClient:
         """Responds to a measurement request from the server,
         sending the measurement data in response.
         """
+        print("Measuring")
+        print(body)
         if body["sequence"] == self._sequence_num:
             point: STSPoint = STSPoint(
                 int(body["point"]["x"]), int(body["point"]["y"]), int(body["point"]["z"])
             )
+            print(point.to_list())
             try:
                 if self.is_stage:
                     point=point.get_local(self.cal_a, self.cal_b, self.cal_c,
@@ -254,6 +258,7 @@ class STSClient:
                 )
             finally:
                 # call ready no matter if it failed or not
+                print("Sending ready")
                 self._ready()
 
 
@@ -276,10 +281,17 @@ class STSClient:
         """The event thread function, that is run in a seperate thread."""
         while self._event_alive:
             try:
+                if int(time.time()) - self.last_heartbeat > 30:
+                    requests.post(
+                        f"{self.url}",
+                        json={"topic": 'heartbeat', "body": {"name": self._name}},
+                        timeout=1000,
+                    )
+                    self.last_heartbeat = int(time.time())
                 retrieve_response: requests.Response = requests.get(
                     f"{self.url}/retrieve",
                     params={"Id": str(self._latest_id), "topics[]": self._topics},
-                    timeout=100
+                    timeout=1000
                 )
                 if retrieve_response.ok:
                     retrieve_json: Any = retrieve_response.json()
@@ -296,6 +308,7 @@ class STSClient:
             except Exception as exc: #pylint: disable = broad-exception-caught
                 self._event_crash=exc
                 print("Client has encountered an error.")
+                print(exc)
                 # self._event_alive=False
         
 
@@ -314,7 +327,9 @@ class STSClient:
 
     def _ready(self) -> None:
         """Sends a ready message to the server"""
+        print("_ready: Sending ready")
         self.emit("ready", {"sequence": self._sequence_num, "name": self._name})
+        print("_ready: Sent ready")
 
     def _err_chk(self) -> None:
         """Checks if the event thread has crashed and raises the error if it has"""
@@ -324,9 +339,11 @@ class STSClient:
     def emit(self, topic: str, body: dict[str, Any]) -> None:
         """Sends jsonified `body` with `topic` to server"""
         self._err_chk()
+        print(f"emit: {topic}")
         requests.post(
             f"{self.url}", json={"topic": topic, "body": body}, timeout=1000
         )
+        print(f"emit: {topic} sent")
         
         
 
@@ -355,10 +372,12 @@ if __name__ == "__main__":
         STSPoint(0,0,0), STSPoint(100,0,-23), STSPoint(0,100,0)).to_list())
 
 
-    def _measure(pt_num: int, experiment_id: int) -> None:
-        time.sleep(4)
-        client.send_file("./test5.txt", pt_num, experiment_id)
-
-    with STSClient("http://localhost:3000", 1, "DEBUG", True) as client:
+    name = input("Name: ")
+    with STSClient("http://localhost", True, 2, name, True) as client:    
+        def _measure(pt_num: int, experiment_id: int) -> None:
+            time.sleep(1)
+            print("Measuring")
+            #client.emit('ready', {'sequence': 1, 'name': 'DEBUG'})
+            #client.send_file("./test5.txt", pt_num, experiment_id)
         client.onmeasure = _measure
         input()
