@@ -6,7 +6,7 @@ port = 80
 [database]
 name = "sts_db"
 username = "ST_server"
-host = "localhost"
+host = "192.168.80.1"
 
 [messageQueue]
 # monitorReloadTime is the time in milliseconds
