@@ -1,15 +1,18 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import type { MessagePayload, QueueResponse} from './lib/messageQueue.js';
+import type { QueueResponse} from './lib/messageQueue.js';
 import { mainQueue } from './lib/messageQueue.js';
 import { server as config } from './config.js';
 import http from 'http';
-import { Server } from 'socket.io';
-import { websocketSetup } from './routes/websocket.messageQueue.js';
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-websocketSetup(io);
+//import { Server } from 'socket.io';
+//import { websocketSetup } from './routes/websocket.messageQueue.js';
+import expressWs from 'express-ws';
+const rawExpress = express();
+const wsInstance = expressWs(rawExpress);
+const app = wsInstance.app;
+//const server = http.createServer(app);
+//const io = new Server(server);
+//websocketSetup(io);
 const port = config.port;
 // set the view engine to ejs
 app.set('view engine', 'ejs');
@@ -18,27 +21,27 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('static'));
 //dev url logger
 app.use((req, res, next)=>{
-	//console.log(req.url);
+	//console.log(req.url, req.method, req.body);
 	next();
 });
-
 // Router declarations
 
 // messageQueue route 
-import {router as msgQRouter} from './routes/messageQueue.js';
-app.use('/messageQueue', msgQRouter);
+import msgQRouter from './routes/messageQueue.js';
+app.use('/messageQueue', msgQRouter(wsInstance));
 
-import { sampleController } from './routes/sampleController.js';
-app.use('/samples', sampleController);
+import sampleController from './routes/sampleController.js';
+app.use('/samples', sampleController(wsInstance));
 
-import { pointsetController } from './routes/pointsetController.js';
-app.use('/points', pointsetController);
+import pointsetController from './routes/pointsetController.js';
+app.use('/pointsets', pointsetController(wsInstance));
 
 import { pointController } from './routes/pointController.js';
-app.use('/pt', pointController);
+app.use('/points', pointController);
 
-import { experimentController } from './routes/experimentController.js';
-app.use('/experiments', experimentController);
+import experimentController from './routes/experimentController.js';
+import { Message } from './lib/messageQueueMessages.js';
+app.use('/experiments', experimentController(wsInstance));
 
 // main page redirects to samples
 app.get('/', (req, res) => {res.redirect('/samples');});
@@ -69,7 +72,7 @@ app.get('/retrieve', (req, res) => {
 	}
 	if(!isNaN(id)){
 		const response: QueueResponse={latestId:mainQueue.getId(), messages:[]};
-		const messages: MessagePayload[]=[...mainQueue.messagesSinceId(id,topics)];
+		const messages: Message[]=[...mainQueue.messagesSinceId(id,topics)];
 		messages.forEach(value=>response.messages.push(value));
 		res.send(response);
 	}else{
@@ -79,11 +82,18 @@ app.get('/retrieve', (req, res) => {
 	}
 });
 
-
-server.listen(port, () => {
+const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 });
 
 export function stop(){
 	server.close();
 }
+/*
+server.listen(port, () => {
+	console.log(`Server listening on port ${port}`);
+});
+
+export function stop(){
+	server.close();
+}*/

@@ -9,26 +9,26 @@
 	<%- include('../misc/bootstrap') %>
 </head>
 <body>
-	<form action="" id = "updateForm">
+	<form action="/pointsets/<%= pointSet.id %>/edit" id = "updateForm" method="post">
 		<label for="name">Name</label>
         <input type="text" name="name" value="<%= pointSet.name %>">
         <label for="description">Description</label>
         <input type="text" name="description" value="<%= pointSet.description %>"><br>
 		<h2>Calibration points</h2>
 		<h3>A</h3>
-        x: <input type="number" name="calAx" value="<%= pointSet.calibration.A.x %>" id="cax" readonly><br>
-        y: <input type="number" name="calAy" value="<%= pointSet.calibration.A.y %>" id="cay" readonly><br>
-        z: <input type="number" name="calAz" value="<%= pointSet.calibration.A.z %>" id="caz" readonly><br>
+        x: <input type="number" name="calAx" value="<%= pointSet.calibration.A.x %>" id="cax" ><br>
+        y: <input type="number" name="calAy" value="<%= pointSet.calibration.A.y %>" id="cay" ><br>
+        z: <input type="number" name="calAz" value="<%= pointSet.calibration.A.z %>" id="caz" ><br>
         <button class="btn btn-secondary" type="button" id="aBtn">Set</button><br>
         <h3>B</h3>
-		x: <input type="number" name="calBx" value="<%= pointSet.calibration.B.x %>" id="cbx" readonly><br>
-        y: <input type="number" name="calBy" value="<%= pointSet.calibration.B.y %>" id="cby" readonly><br>
-        z: <input type="number" name="calBz" value="<%= pointSet.calibration.B.z %>" id="cbz" readonly><br>
+		x: <input type="number" name="calBx" value="<%= pointSet.calibration.B.x %>" id="cbx" ><br>
+        y: <input type="number" name="calBy" value="<%= pointSet.calibration.B.y %>" id="cby" ><br>
+        z: <input type="number" name="calBz" value="<%= pointSet.calibration.B.z %>" id="cbz" ><br>
         <button class="btn btn-secondary" type="button" id="bBtn">Set</button><br>
         <h3>C</h3>
-		x: <input type="number" name="calCx" value="<%= pointSet.calibration.C.x %>" id="ccx" readonly><br>
-        y: <input type="number" name="calCy" value="<%= pointSet.calibration.C.y %>" id="ccy" readonly><br>
-        z: <input type="number" name="calCz" value="<%= pointSet.calibration.C.z %>" id="ccz" readonly><br>
+		x: <input type="number" name="calCx" value="<%= pointSet.calibration.C.x %>" id="ccx" ><br>
+        y: <input type="number" name="calCy" value="<%= pointSet.calibration.C.y %>" id="ccy" ><br>
+        z: <input type="number" name="calCz" value="<%= pointSet.calibration.C.z %>" id="ccz" ><br>
         <button class="btn btn-secondary" type="button" id="cBtn">Set</button><br>
 		<input class="btn btn-primary" type="submit" value="Save changes"><br>
 	</form>

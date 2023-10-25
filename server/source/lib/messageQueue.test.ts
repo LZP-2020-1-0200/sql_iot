@@ -1,12 +1,13 @@
 import assert from "node:assert";
-import { HaltExperimentMessage, Message, MessageQueue, ReadyMessage, UncalibratedMessage, isHaltExperimentMessage, isInstrumentData, isReadyMessage, isUncalibratedMessage } from "./messageQueue.js";
 import { test } from "node:test";
 import type { JSONValue } from "../config.js";
+import { MessageQueue, TopicMessage } from "./messageQueue.js";
+import { HaltExperimentMessage, ReadyMessage, UncalibratedMessage, isHaltExperimentMessage, isInstrumentData, isReadyMessage, isUncalibratedMessage } from "./messageQueueMessages.js";
 
 
 test('Message packing', () => {
 	const dat: JSONValue = {x:54, "0":{data:[1,{c:"d"}]}};
-	const msg = new Message('testing123', dat);
+	const msg = new TopicMessage('testing123', dat);
 	assert.deepEqual({topic: 'testing123', body: dat}, msg.data);
 });
 test('MessageQueue', async (tctx) => {
@@ -448,6 +449,7 @@ test('isHaltExperimentMessage', {timeout: 1000}, async (tctx) => {
 	await tctx.test('valid object', async () => {
 		const msg: HaltExperimentMessage = {
 			topic: "halt_experiment",
+			body: {}
 		};
 		assert(isHaltExperimentMessage(msg)===true);
 	});

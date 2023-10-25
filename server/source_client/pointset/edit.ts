@@ -51,7 +51,7 @@ $(() => {
 
 // sends the new point to the server, then reloads the page
 $('#addSingle').on('click', async () => {
-	console.log(await fetch(`/pt/${id}/add`, {
+	console.log(await fetch(`/points/${id}/add`, {
 		method: 'POST',
 		headers: {
 			"Content-Type": "application/json"

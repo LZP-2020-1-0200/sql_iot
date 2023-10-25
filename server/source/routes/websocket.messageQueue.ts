@@ -1,6 +1,7 @@
+// TODO: Nahranizet sito datni
+
 import { Server } from "socket.io";
 import { mainQueue } from "../lib/messageQueue.js";
-import { launchSequencedExperiment } from "../lib/experimentControl.js";
 import { Experiment } from "../models/Experiment.js";
 import exp from "constants";
 import { Point } from "../models/Point.js";
@@ -19,7 +20,7 @@ export function websocketSetup(io: Server) {
 				socket.emit('error', `Experiment ${exId} not found`);
 				return;
 			}
-			launchSequencedExperiment(mainQueue, experiment.id, experiment.pointset?.points ?? [], (data)=>socket.emit('log', data));
+			//launchSequencedExperiment(mainQueue, experiment.id, experiment.pointset?.points ?? [], (data)=>socket.emit('log', data));
 		});
 		socket.on('log', (msg) => {
 			console.log(msg);

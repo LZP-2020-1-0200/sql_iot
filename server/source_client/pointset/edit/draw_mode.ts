@@ -266,7 +266,7 @@ $('#lineEndBtn').on('click', () => {
 // WONTFIX: make this not reload the page (would require a lot of refactoring and add extra points of failure)
 
 $('#lineCreateBtn, #rectangleCreateBtn').on('click', async () => {
-	await fetch(`/pt/${id}/bulkadd`, {
+	await fetch(`/points/${id}/bulkadd`, {
 		method: 'POST',
 		headers: {
 			"Content-Type": "application/json"

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point sets</title>
+	<%- include('../misc/bootstrap') %>
+</head>
+<body>
+	<a href="/samples" class="btn btn-primary">&lt; Back to sample list</a>
+    <h1><%- sample.name %></h1>
+    <p><%- sample.description %></p>
+	<a href="/samples/<%- sample.id %>/edit" class="btn btn-primary">Edit Sample</a>
+	<h2>Point sets</h2>
+    <div>
+		<table>
+			<% if (sample.pointsets.length==0) { %>
+				<tr>
+					<td>No pointsets found</td>
+				</tr>
+			<% } else { %>
+				<% sample.pointsets.forEach(pointset => { %>
+					<tr>
+						<td><a href="/pointsets/<%= pointset.id %>/item" class="d-flex btn btn-primary"><%- pointset.name %></td>
+						<td><a href="/pointsets/<%= pointset.id %>/edit" class="btn btn-secondary">Edit pointset</a></td>
+					</tr>
+				<% }) %>
+			<% } %>
+		</table>
+        <a href="/pointsets/<%- sample.id %>/add" class = "btn btn-secondary">Add new point set</a>
+    </div>
+</body>
+</html>

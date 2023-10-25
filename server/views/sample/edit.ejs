@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title><%- sample.name %></title>
+	<%- include('../misc/bootstrap') %>
+</head>
+<body>
+	<a href="/samples/<%- sample.id %>/item" class="btn btn-primary">&lt; Back to sample</a>
+	<form action="/samples/<%= sample.id %>/edit" method="post">
+		<label for="sampleName">Name: </label>
+		<input type="text" name="sampleName" id="sampleName" value="<%- sample.name %>"><br>
+		<label for="sampleDescription">Description: </label>
+		<input type="text" name="sampleDescription" id="sampleDescription" value="<%- sample.description %>"><br>
+
+	</form>
+</body>
+</html>

@@ -2,133 +2,8 @@
 import type { JSONValue } from '../config.js';
 import type { PointData, calibrationSet } from './coordinate.js';
 import { isPointData } from './coordinate.js';
-/**
- * The payload of a message
- */
-export interface MessagePayload {
-	topic: string;
-	body?: JSONValue;
-}
+import { InstrumentData, Message as Message, isInstrumentData } from './messageQueueMessages.js';
 
-export type MeasureMessage = {
-	topic: 'measure';
-	body: {
-		point: PointData;
-		sequence: number;
-		pointNumber: number;
-		experimentId: number;
-	};
-}
-
-export type InstrumentPingMessage = {
-	topic: 'instrument_ping';
-	body: undefined;
-}
-
-export type InstrumentDataMessage = {
-	topic: 'instrument_data';
-	body: {
-		sequence: number;
-		name: string;
-		priority: boolean;
-		local_cal: [boolean, boolean, boolean];
-		dataset_cal: [boolean, boolean, boolean];
-	};
-}
-
-export type ReadyMessage = {
-	topic: 'ready';
-	body: {
-		sequence: number;
-		name: string;
-	};
-}
-
-export function isReadyMessage(arg: unknown): arg is ReadyMessage {
-	if (typeof arg !== 'object' || arg === null) {
-		return false;
-	}
-	const obj = arg as ReadyMessage;
-	return obj.topic === 'ready' && 
-		typeof obj.body === 'object' && 
-		obj.body !== null && 
-		typeof obj.body.sequence === 'number' && 
-		typeof obj.body.name === 'string';
-}
-
-export type CalibrationMessage = {
-	topic: 'calibration';
-	body: calibrationSet;
-}
-
-export type PointInfoQMessage = {
-	topic: 'point_info?';
-	body: undefined;
-}
-
-export type PointInfoMessage = {
-	topic: 'point_info';
-	body: PointData;
-}
-
-export type SetLocalCalMessage = {
-	topic: 'set_local_calibration';
-	body: {
-		point:'A' | 'B' | 'C';
-	};
-}
-
-export type DataMoveMessage = {
-	topic: 'data_move';
-	body: PointData;
-}
-
-export type MoveMessage = {
-	topic: 'move';
-	body: PointData;
-}
-
-export type UncalibratedMessage = {
-	topic: 'uncalibrated';
-	body: {
-		name: string;
-		local: [boolean, boolean, boolean];
-		dataset: [boolean, boolean, boolean];
-	};
-}
-
-export function isUncalibratedMessage(arg: unknown): arg is UncalibratedMessage {
-	if (typeof arg !== 'object' || arg === null) {
-		return false;
-	}
-	const obj = arg as UncalibratedMessage;
-	return obj.topic === 'uncalibrated' &&
-		typeof obj.body === 'object' &&
-		obj.body !== null &&
-		typeof obj.body.name === 'string' &&	
-		Array.isArray(obj.body.local) &&
-		obj.body.local.length === 3 &&
-		typeof obj.body.local[0] === 'boolean' &&
-		typeof obj.body.local[1] === 'boolean' &&
-		typeof obj.body.local[2] === 'boolean' &&
-		Array.isArray(obj.body.dataset) &&
-		obj.body.dataset.length === 3 &&
-		typeof obj.body.dataset[0] === 'boolean' &&
-		typeof obj.body.dataset[1] === 'boolean' &&
-		typeof obj.body.dataset[2] === 'boolean';
-}
-
-export type HaltExperimentMessage = {
-	topic: 'halt_experiment';
-};
-
-export function isHaltExperimentMessage(arg: unknown): arg is HaltExperimentMessage {
-	if (typeof arg !== 'object' || arg === null) {
-		return false;
-	}
-	const obj = arg as HaltExperimentMessage;
-	return obj.topic === 'halt_experiment';
-}
 
 		
 
@@ -138,7 +13,7 @@ export function isHaltExperimentMessage(arg: unknown): arg is HaltExperimentMess
  */
 export type QueueResponse = {
 	"latestId":number;
-	"messages":MessagePayload[];
+	"messages":Message[];
 };
 
 /**
@@ -147,7 +22,7 @@ export type QueueResponse = {
  * @param topic The topic of the message
  * @param msg A JSON object containing the message body
  */
-export class Message{
+export class TopicMessage{
 	topic: string;
 	msg: JSONValue;
 	constructor(topic:string, msg:JSONValue){
@@ -159,56 +34,12 @@ export class Message{
 	 * Returns the message as a MessagePayload for sending 
 	 * this message over the network
 	 */
-	get data(): MessagePayload{
-		const packed:MessagePayload={topic: this.topic, body: this.msg};
+	get data(): Message{
+		const packed:Message={topic: this.topic, body: this.msg};
 		return packed;
 	}
 }
 
-export interface InstrumentData{
-	"priority": boolean;
-	"name": string;
-	"sequence": number;
-	"local_cal"?: [boolean, boolean, boolean];
-	"dataset_cal"?: [boolean, boolean, boolean];
-}
-
-export function isInstrumentData(arg: unknown): arg is InstrumentData {
-	if(typeof arg !== 'object' || arg === null){
-		return false;
-	}
-	const obj = arg as Record<string, unknown>;
-	if(typeof obj.priority !== 'boolean'){
-		return false;
-	}
-	if(typeof obj.name !== 'string'){
-		return false;
-	}
-	if(typeof obj.sequence !== 'number'){
-		return false;
-	}
-	if(obj.local_cal !== undefined) {
-		if(!Array.isArray(obj.local_cal) || obj.local_cal.length !== 3){
-			return false;
-		}
-		for(const x of obj.local_cal){
-			if(typeof x !== 'boolean'){
-				return false;
-			}
-		}
-	}
-	if(obj.dataset_cal !== undefined) {
-		if(!Array.isArray(obj.dataset_cal) || obj.dataset_cal.length !== 3){
-			return false;
-		}
-		for(const x of obj.dataset_cal){
-			if(typeof x !== 'boolean'){
-				return false;
-			}
-		}
-	}
-	return true;
-};
 
 // TODO: Move constants to a config file or .env
 /**
@@ -234,6 +65,50 @@ export const locationUpdateMaxTries = 20;
  */
 const deviceUpdateWaitTime = 1000;
 
+export class MessageQueueStream {
+	private queue: MessageQueue;
+	private startId: number;
+	private generator: Generator<Message, number>;
+	private nextValue: IteratorResult<Message, number>;
+	private filter: string[] | string;
+	constructor(queue: MessageQueue, filter: string[] | string = 'all') {
+		this.queue = queue;
+		this.startId = queue.getId();
+		this.nextValue = { done: true, value: this.startId };
+		this.generator = this.queue.messagesSinceId(this.startId, filter);
+		this.filter = filter;
+	}
+
+	/**
+	 * Fetches the next message from the queue.
+	 * If the queue is empty, returns null.
+	 * Just because the queue is empty does not mean that
+	 * the stream is done. It will return null until a new
+	 * message is added to the queue.
+	 * @returns 
+	 */
+	next(): Message | null {
+		this.nextValue = this.generator.next();
+        if(this.nextValue.done) {
+            this.startId = this.nextValue.value;
+            this.generator = this.queue.messagesSinceId(this.startId, this.filter);
+            return null;
+        }
+        return this.nextValue.value;
+	}
+
+	consume(callback: (message: Message) => void): void {
+		while (true){
+			const next = this.next();
+			if(next === null) return;
+			callback(next);
+		}
+	}
+
+
+}
+
+
 /**
  * A queue of messages that clients can post to and retrieve from.
  * Used as a way to communicate between the server and the clients.
@@ -244,7 +119,7 @@ export class MessageQueue{
 	/**
 	 * The queue of messages
 	 */
-	private queue:Message[];
+	private queue:TopicMessage[];
 	/**
 	 * The last time the queue was accessed
 	 */
@@ -259,6 +134,11 @@ export class MessageQueue{
 	 * The idle reset time for the queue
 	 */
 	readonly timeout: number;
+
+	/**
+	 * Callbacks to fire upon receiving a message
+	 */
+	private onMessageCallbacks: (() => void)[] = [];
 
 	constructor(resetTime: number = defaultTimeout){
 		this.timeout = resetTime;
@@ -350,16 +230,20 @@ export class MessageQueue{
 		return this.queue.length;
 	}
 
+	getStream(filter: string[] | string = 'all'): MessageQueueStream {
+		return new MessageQueueStream(this, filter);
+	}
+
 	/**
      * A generator that yields messages since the last received message, ends when the queue is empty
      * @param id 
      * the id of the last received message
      * @param topics 
      * a list of topics
-	 * @returns {Generator<MessagePayload>} a generator that
+	 * @returns {Generator<Message>} a generator that
 	 * yields messages since the last received message
      */
-	*messagesSinceId(id:number, topics:string[] | string): Generator<MessagePayload> {
+	*messagesSinceId(id:number, topics:string[] | string): Generator<Message, number> {
 		if(typeof topics=='string'){
 			topics=[topics];
 		}
@@ -369,6 +253,7 @@ export class MessageQueue{
 				yield this.queue[it].data;
 			}
 		}
+		return this.getId();
 	}
 
 	/**
@@ -381,7 +266,7 @@ export class MessageQueue{
 	 * a list of topics
 	 * 
 	 */
-	async *messagesSinceIdAsync(id:number, topics:string[] | string): AsyncGenerator<MessagePayload, never> {
+	async *messagesSinceIdAsync(id:number, topics:string[] | string): AsyncGenerator<Message, never> {
 		if(typeof topics=='string'){
 			topics=[topics];
 		} else if (typeof topics == 'undefined') {
@@ -392,7 +277,7 @@ export class MessageQueue{
 			if(index >= this.queue.length) {
 				// TODO: move timeout length to .env
 				//console.log('waiting for message');
-				await new Promise((resolve) => { setTimeout(resolve, 100); });
+				await new Promise((resolve) => { this.onMessageCallbacks.push(()=>{ resolve(undefined); }); });
 				continue;
 			}
 			if(topics.includes("all") || topics.includes(this.queue[index].topic)){
@@ -410,7 +295,7 @@ export class MessageQueue{
 	 */
 	private addMessageTB(topic:string, body:JSONValue | undefined) {
 		this.timeUpdate();
-		const message:Message = new Message(topic, (body === undefined) ? {} : structuredClone(body));
+		const message:TopicMessage = new TopicMessage(topic, (body === undefined) ? {} : structuredClone(body));
 		if(topic=='pointinfo'){
 			if(isPointData(body)){
 				this.lastPoint=body;
@@ -423,18 +308,20 @@ export class MessageQueue{
 	 * Pushes a message to the queue with a MessagePayload
 	 * @param payload The message payload
 	 */
-	private addMessageP(payload: MessagePayload) {
+	private addMessageP(payload: Message) {
 		this.addMessageTB(payload.topic, payload.body);
 	}
 
 	addMessage(topic: string, body: JSONValue): void;
-	addMessage(payload: MessagePayload): void;
-	addMessage(topicOrPayload: string | MessagePayload, body?: JSONValue) {
+	addMessage(payload: Message): void;
+	addMessage(topicOrPayload: string | Message, body?: JSONValue) {
 		if(typeof topicOrPayload == 'string') {
 			this.addMessageTB(topicOrPayload, body);
 		} else {
 			this.addMessageP(topicOrPayload);
 		}
+		this.onMessageCallbacks.forEach((callback) => { callback(); });
+		this.onMessageCallbacks = [];
 	}
 }
 

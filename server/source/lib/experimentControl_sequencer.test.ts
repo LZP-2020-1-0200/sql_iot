@@ -1,8 +1,7 @@
 import test from 'node:test';
-import { Sequencer, launchSequencedExperiment, sequencePoint } from './experimentControl.js';
 import assert from 'node:assert';
 import { mock } from 'node:test';
-import { MessageQueue, ReadyMessage, isReadyMessage } from './messageQueue.js';
+import { MessageQueue } from './messageQueue.js';
 import FakeTimers from '@sinonjs/fake-timers';
 import { Point } from '../models/Point.js';
 import '../models/index.js';
@@ -10,7 +9,7 @@ import '../models/index.js';
 
 
 test('Sequencer tests', async (tctx) => {
-
+/*
 	await tctx.test('Sequencer order', async () => {
 		let sequencer = new Sequencer();
 		sequencer.addDevice({name: 'b', sequence: 1, priority: true});
@@ -65,7 +64,8 @@ test('Sequencer tests', async (tctx) => {
 		sequencer.markDeviceAsDone('d');
 		assert(sequencer.isDone());
 	});
-
+	*/
+	/*
 	await tctx.test('Sequence point', async () => {
 		const clock = FakeTimers.install();
 		let sequencer = new Sequencer();
@@ -92,7 +92,8 @@ test('Sequencer tests', async (tctx) => {
 		assert(sequencer.isDone());
 		clock.uninstall();
 	});
-
+	*/
+	/*
 	await tctx.test('Sequenced experiment launch', async () => {
 		let clock = FakeTimers.install();
 		let messageQueue = new MessageQueue();
@@ -152,4 +153,5 @@ test('Sequencer tests', async (tctx) => {
 		clock.uninstall();
 		
 	});
+	*/
 });

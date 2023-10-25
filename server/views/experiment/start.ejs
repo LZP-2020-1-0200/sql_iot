@@ -5,8 +5,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Experiment control panel</title>
 	<%- include('../misc/bootstrap') %>
+
 </head>
 <body>
+	<div id="experimentId" data-experimentId="<%= experiment.id %>"></div>
 	<script type="module" defer src="/bundles/experiment_start.js"></script>
 	<h1>
 		<%- experiment.name %>
@@ -19,5 +21,7 @@
 		
 	<% } %>
 	<%- include('../messageQueue/device_list') %>
+	<h2>Experiment log</h2>
+	<div id="experimentLog"></div>
 </body>
 </html>

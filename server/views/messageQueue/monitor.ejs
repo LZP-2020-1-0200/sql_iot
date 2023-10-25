@@ -12,11 +12,18 @@
     <div id = "messageListing"></div>
     <button onclick="doRefresh=!doRefresh">Toggle refreshing</button>
     <script>
+        /*
         const startId = <%= lastId %>;
         var doRefresh = true;
         setInterval(()=>{
             if(doRefresh)$("#messageListing").load('/messageQueue/monitor/list/'+startId);
         },3000);
+        */
+        const ws = new WebSocket('ws://localhost/messageQueue/listen');
+        ws.onmessage = (event)=>{
+            console.log(event.data);
+            $("#messageListing").prepend(event.data+"<br>");
+        }
     </script>
 </body>
 </html>

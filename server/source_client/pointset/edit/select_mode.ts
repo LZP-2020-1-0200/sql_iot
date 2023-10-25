@@ -78,7 +78,7 @@ $('g').on('click', (e) => {
 
 // send request to disable selected points
 $('#disableButton').on('click', async () => {
-	console.log(await fetch(`/pt/${id}/edit`, {
+	console.log(await fetch(`/points/${id}/edit`, {
 		method: 'PUT',
 		headers: {
 			"Content-Type": "application/json"
@@ -90,7 +90,7 @@ $('#disableButton').on('click', async () => {
 
 // send request to enable selected points
 $('#enableButton').on('click', async () => {
-	console.log(await fetch(`/pt/${id}/edit`, {
+	console.log(await fetch(`/points/${id}/edit`, {
 		method: 'PUT',
 		headers: {
 			"Content-Type": "application/json"
