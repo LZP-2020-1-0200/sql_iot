@@ -1,6 +1,7 @@
 
 
 
+import { heartbeatTimeout } from '../config.js';
 import { MessageQueue, MessageQueueStream } from './messageQueue.js';
 import { Message, isHeartbeatMessage } from './messageQueueMessages.js';
 
@@ -10,6 +11,8 @@ interface Device {
 }
 
 type HeartbeatCallback = (deviceId: string) => void;
+
+const HEARTBEAT_TIMEOUT = heartbeatTimeout;
 
 export class HeartbeatMonitor {
 	private devices: Device[] = [];
@@ -45,17 +48,6 @@ export class HeartbeatMonitor {
 		const now = Date.now();
 		const devicesToRemove: string[] = [];
 
-		for (const device of this.devices) {
-			if (now - device.lastHeartbeat > 60*1000) {
-				devicesToRemove.push(device.name);
-			}
-		}
-
-		for (const deviceName of devicesToRemove) {
-			//this.removeDevice(deviceName);
-			this.callback(deviceName);
-		}
-
 		this.messageQueueStream.consume((message) => {
 			if(!isHeartbeatMessage(message)) return;
 			const deviceName = message.body.name;
@@ -66,6 +58,17 @@ export class HeartbeatMonitor {
 				this.addDevice(deviceName);
 			}
 		});
+
+		for (const device of this.devices) {
+			if (now - device.lastHeartbeat > HEARTBEAT_TIMEOUT) {
+				devicesToRemove.push(device.name);
+			}
+		}
+
+		for (const deviceName of devicesToRemove) {
+			this.removeDevice(deviceName);
+			this.callback(deviceName);
+		}
 	}
 
 	addDevice(deviceName: string): void {
@@ -90,5 +93,9 @@ export class HeartbeatMonitor {
 
 	clearDevices(): void {
 		this.devices = [];
+	}
+
+	getDevices(): string[] {
+		return this.devices.map((d) => d.name);
 	}
 }

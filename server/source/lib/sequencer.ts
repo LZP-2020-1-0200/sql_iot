@@ -37,7 +37,7 @@ export class Sequencer {
 	}
 
 	private informDevices(){
-		console.log('Informing devices');
+		//console.log('Informing devices');
 		const sequenceItem = this.sequence[this.sequenceIndex];
 		if(sequenceItem === undefined) {
 			this.checkReady();
@@ -50,14 +50,14 @@ export class Sequencer {
 		}
 		this.onSequence(this.sequenceIndex);
 		for(const device of allDevices){
-			console.log('Informing device ', device);
+			//console.log('Informing device ', device);
 			this.onMeasure(device);
 		}
 
 	}
 
 	private checkReady(){
-		console.log('Checking ready')
+		//console.log('Checking ready')
 		if(this.waitlist.size === 0){
 			this.sequenceIndex++;
 			// check if we are done with the sequence
@@ -80,7 +80,7 @@ export class Sequencer {
 	}
 
 	start(){
-		console.log('Starting sequencer');
+		//console.log('Starting sequencer');
 		this.sequenceIndex = 0;
 		this.waitlist = new Set();
 		if(this.sequence.length == 0) return;

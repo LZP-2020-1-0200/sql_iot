@@ -18,14 +18,17 @@ export type JSONValue =
 const config = toml.parse(fs.readFileSync('./config.toml', 'utf-8'));
 
 
-export const server = {...config.server as {
+export const server = {
+	...config.server, 
+	...process.env.STS_PORT && {port: Number(process.env.STS_PORT)}
+} as {
 	port: number;
-}, ...process.env.STS_PORT && {port: process.env.STS_PORT}};
+};
 
-config.database.password = process.env.STS_DB_PASS ?? '';
-config.database.username = process.env.STS_DB_USER ?? '';
-config.database.host = process.env.STS_DB_HOST ?? '';
-config.database.name = process.env.STS_DB_NAME ?? '';
+config.database.password = process.env.STS_DB_PASS ?? config.database.password;
+config.database.username = process.env.STS_DB_USER ?? config.database.username;
+config.database.host = process.env.STS_DB_HOST ?? config.database.host;
+config.database.name = process.env.STS_DB_NAME ?? config.database.name;
 
 export const database = config.database as {
 	name: string;
@@ -37,3 +40,5 @@ export const database = config.database as {
 export const messageQueue = config.messageQueue as {
 	monitorReloadTime: number;
 };
+
+export const heartbeatTimeout = Number(process.env.STS_HEARTBEAT_TIMEOUT ?? 60*1000);
