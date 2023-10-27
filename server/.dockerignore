@@ -1,5 +1,0 @@
-/.rollup.cache
-/build
-/cypress**
-/node_modules
-.env
