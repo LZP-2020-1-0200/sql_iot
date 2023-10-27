@@ -1,7 +1,14 @@
+/// This file contains the configuration for the server.
+/// It reads the config.toml file and parses it to a JSON object.
+/// It also reads the environment variables and overwrites some of the config values,
+/// if the environment variables are set.
+
 import * as toml from 'toml';
 import fs from 'fs';
 import 'dotenv/config';
 
+
+// read the toml config file.
 export type JSONValue =
     | string
     | number
@@ -11,11 +18,14 @@ export type JSONValue =
 const config = toml.parse(fs.readFileSync('./config.toml', 'utf-8'));
 
 
-export const server = config.server as {
+export const server = {...config.server as {
 	port: number;
-};
+}, ...process.env.STS_PORT && {port: process.env.STS_PORT}};
 
-config.database.password = process.env.DB_PASS ?? '';
+config.database.password = process.env.STS_DB_PASS ?? '';
+config.database.username = process.env.STS_DB_USER ?? '';
+config.database.host = process.env.STS_DB_HOST ?? '';
+config.database.name = process.env.STS_DB_NAME ?? '';
 
 export const database = config.database as {
 	name: string;

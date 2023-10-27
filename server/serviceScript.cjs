@@ -1,9 +1,9 @@
 var Service = require('node-windows').Service;
-
+const serviceName = 'Sequential thing server';
 if(process.argv[2] === 'uninstall') {
   // get the service
   var svc = new Service({
-    name:'Sequential thing server',
+    name:serviceName,
     script: 'D://sql_iot/server/build/server.js',
   });
   // Listen for the "uninstall" event so we know when it's done.
@@ -14,10 +14,11 @@ if(process.argv[2] === 'uninstall') {
 
   // Uninstall the service.
   svc.uninstall();
+
 } else if(process.argv[2] === 'install') {
   // Create a new service object
   var svc = new Service({
-    name:'Sequential thing server',
+    name: serviceName,
     description: 'This service runs the Sequential thing server.',
     script: 'D://sql_iot/server/build/server.js',
     nodeOptions: [
@@ -35,6 +36,11 @@ if(process.argv[2] === 'uninstall') {
   svc.on('install',function(){
     svc.start();
   });
+
+  svc.on('alreadyinstalled', function() {
+    svc.start();
+    console.log("Service already installed");
+  })
 
   svc.install();
 } else {
