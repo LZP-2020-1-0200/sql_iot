@@ -1,15 +1,11 @@
-//import { Socket } from "socket.io";
-import { MessageQueue, mainQueue } from "./messageQueue.js";
+import { MessageQueue } from "./messageQueue.js";
 import { Experiment, Point, Pointset } from "../models/index.js";
 import { PointData } from "./coordinate.js";
-//import EventEmitter from "node:events";
 import { HeartbeatMessage, InstrumentData, MeasureMessage, Message, isHaltExperimentMessage, isReadyMessage, isUncalibratedMessage } from "./messageQueueMessages.js";
 import { SequenceItem, Sequencer } from "./sequencer.js";
 import { HeartbeatMonitor } from "./heartbeatMonitor.js";
-import expressWs from "express-ws";
 import type WebSocket from "ws";
 
-// TODO: decopule mainQueue from this file
 
 
 type StatusMessage = {
