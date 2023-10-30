@@ -30,33 +30,29 @@ export default function (wsInstance: expressWs.Instance): expressWs.Router {
 	/**
 	 * Experiment index page
 	 */
-	experimentController.get('/:pointsetId?', async (req, res) => {
+	experimentController.get('/:pointsetId(\\d+)', async (req, res) => {
 		let experiments;
 		// Fetch all experiments if no pointset is specified
 		// Otherwise, fetch all experiments that contain the specified pointset
-		if(req.params.pointsetId === undefined || req.params.pointsetId === null || req.params.pointsetId === ""){
-			experiments = await Experiment.findAll({
-				include: [Pointset]
-			});
-		} else {
-			const pointsetId = Number(req.params.pointsetId);
-			if(isNaN(pointsetId)){
-				res.sendStatus(404);
-				return;
-			}
-			const pointset = await Pointset.findByPk(pointsetId);
-			if(pointset === null){
-				res.sendStatus(404);
-				return;
-			}
-			experiments = await Experiment.findAll({
-				include: [Pointset],
-				where: {
-					pointsetId: pointsetId
-				}
-			});
+	
+		const pointsetId = Number(req.params.pointsetId);
+		if(isNaN(pointsetId)){
+			res.sendStatus(404);
+			return;
 		}
-		res.render('experiment/index', {experiments});
+		const pointset = await Pointset.findByPk(pointsetId);
+		if(pointset === null){
+			res.sendStatus(404);
+			return;
+		}
+		experiments = await Experiment.findAll({
+			include: [Pointset],
+			where: {
+				pointsetId: pointsetId
+			}
+		});
+	
+		res.render('experiment/index', {experiments, pointset});
 	});
 
 	/**
@@ -116,7 +112,7 @@ export default function (wsInstance: expressWs.Instance): expressWs.Router {
 		experiment.name = req.body.name;
 		experiment.description = req.body.description;
 		await experiment.save();
-		res.redirect(`/experiment/item/${id}`);
+		res.redirect(`/experiments/item/${id}`);
 	});
 
 	/**

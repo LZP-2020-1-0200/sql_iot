@@ -6,7 +6,7 @@
 		<%- include('../misc/bootstrap') %>
 	</head>
 	<body>
-		<h1>Experiment</h1>
+		<h1>Experiments of <%- pointset.name %></h1>
 		<p>Experiment page</p>
 		<table>
 			<thead>
@@ -20,7 +20,7 @@
 			<tbody>
 				<% experiments.forEach(experiment => { %>
 					<%# Limit the description size to make previewing easier %>
-					<% const nonNullDesc = experiment.description?experiment.description:"";  %>
+					<% const nonNullDesc = experiment.description ?? "";  %>
 					<% const description = nonNullDesc.length > 100 ? nonNullDesc.substring(0, 100) + "..." : nonNullDesc %>
 					<tr>
 						<td><div><%= experiment.name %></div></td>
