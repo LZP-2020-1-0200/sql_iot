@@ -4,7 +4,7 @@ import type { PointData, calibrationSet } from './coordinate.js';
 import { isPointData } from './coordinate.js';
 import { InstrumentData, Message as Message, isInstrumentData } from './messageQueueMessages.js';
 
-
+import { messageQueue as config } from '../config.js';
 		
 
 
@@ -41,21 +41,20 @@ export class TopicMessage{
 }
 
 
-// TODO: Move constants to a config file or .env
 /**
  * The default timeout for the queue reset in milliseconds
  */
-const defaultTimeout=60*1000*5;
+const defaultTimeout=config.defaultTimeout;
 
 /**
  * The timeout for the queue location update in milliseconds
  */
-export const locationUpdateFetchTimeout = 100;
+export const locationUpdateFetchTimeout = config.locationUpdateFetchTimeout;
 /**
  * The maximum number of times to try to retrieve the location
  * of the motorized stage
  */
-export const locationUpdateMaxTries = 20;
+export const locationUpdateMaxTries = config.locationUpdateMaxTries;
 
 /**
  * Set time to wait for devices to update their status
@@ -63,7 +62,7 @@ export const locationUpdateMaxTries = 20;
  * In this time, the ping message should be received by all devices,
  * and they should have sent their status update
  */
-const deviceUpdateWaitTime = 1000;
+const deviceUpdateWaitTime = config.deviceUpdateWaitTime;
 
 export class MessageQueueStream {
 	private queue: MessageQueue;
@@ -97,6 +96,10 @@ export class MessageQueueStream {
         return this.nextValue.value;
 	}
 
+	/**
+	 * Consumes the entire queue, calling the callback for each message
+	 * @param callback Function to call for each message in the queue
+	 */
 	consume(callback: (message: Message) => void): void {
 		while (true){
 			const next = this.next();
@@ -114,8 +117,6 @@ export class MessageQueueStream {
  * Used as a way to communicate between the server and the clients.
  */
 export class MessageQueue{
-
-	//TODO: Refactor to use a dictionary of topics to queues
 	/**
 	 * The queue of messages
 	 */
@@ -275,8 +276,7 @@ export class MessageQueue{
 		let index = id;
 		while(true) {
 			if(index >= this.queue.length) {
-				// TODO: move timeout length to .env
-				//console.log('waiting for message');
+				// push a callback to the onMessageCallbacks array and wait for it to be called upon receiving a message
 				await new Promise((resolve) => { this.onMessageCallbacks.push(()=>{ resolve(undefined); }); });
 				continue;
 			}

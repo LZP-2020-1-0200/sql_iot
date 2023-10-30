@@ -37,8 +37,12 @@ export const database = config.database as {
 	host: string;
 };
 
-export const messageQueue = config.messageQueue as {
-	monitorReloadTime: number;
+export const messageQueue = {
+	monitorReloadTime: Number(process.env.STS_MQ_MONITOR_RELOAD_TIME ?? config.messageQueue.monitorReloadTime),
+	defaultTimeout: Number(process.env.STS_MQ_DEFAULT_TIMEOUT ?? config.messageQueue.defaultTimeout),
+	locationUpdateFetchTimeout: Number(process.env.STS_MQ_LOCATION_UPDATE_FETCH_TIMEOUT ?? config.messageQueue.locationUpdateFetchTimeout),
+	locationUpdateMaxTries: Number(process.env.STS_MQ_LOCATION_UPDATE_MAX_TRIES ?? config.messageQueue.locationUpdateMaxTries),
+	deviceUpdateWaitTime: Number(process.env.STS_MQ_DEVICE_UPDATE_WAIT_TIME ?? config.messageQueue.deviceUpdateWaitTime),
 };
 
 export const heartbeatTimeout = Number(process.env.STS_HEARTBEAT_TIMEOUT ?? 60*1000);
