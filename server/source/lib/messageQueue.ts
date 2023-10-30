@@ -64,6 +64,24 @@ export const locationUpdateMaxTries = config.locationUpdateMaxTries;
  */
 const deviceUpdateWaitTime = config.deviceUpdateWaitTime;
 
+/**
+ * The maximum size of the queue
+ */
+const maxQueueSize = config.maxQueueSize;
+
+/**
+ * A factor of the maxQueueSize to trim the queue to when it overflows
+ */
+const queueOverflowTrim = config.queueOverflowTrim;
+
+/**
+ * The size to trim the queue to when it overflows
+ */
+const queueOverflowTrimSize = Math.floor(maxQueueSize * queueOverflowTrim);
+
+/**
+ * A stream of messages from a MessageQueue
+ */
 export class MessageQueueStream {
 	private queue: MessageQueue;
 	private startId: number;
@@ -296,12 +314,18 @@ export class MessageQueue{
 	private addMessageTB(topic:string, body:JSONValue | undefined) {
 		this.timeUpdate();
 		const message:TopicMessage = new TopicMessage(topic, (body === undefined) ? {} : structuredClone(body));
+		// special behavior for pointinfo messages
+		// TODO: bad practice, should be handled differently
 		if(topic=='pointinfo'){
 			if(isPointData(body)){
 				this.lastPoint=body;
 			}
 		}
+		// TODO: Add tests for this
 		this.queue.push(message);
+		if(this.queue.length>maxQueueSize){
+			this.queue = this.queue.splice(0,queueOverflowTrimSize);
+		}
 	}
 
 	/**

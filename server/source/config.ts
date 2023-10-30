@@ -38,11 +38,14 @@ export const database = config.database as {
 };
 
 export const messageQueue = {
-	monitorReloadTime: Number(process.env.STS_MQ_MONITOR_RELOAD_TIME ?? config.messageQueue.monitorReloadTime),
-	defaultTimeout: Number(process.env.STS_MQ_DEFAULT_TIMEOUT ?? config.messageQueue.defaultTimeout),
-	locationUpdateFetchTimeout: Number(process.env.STS_MQ_LOCATION_UPDATE_FETCH_TIMEOUT ?? config.messageQueue.locationUpdateFetchTimeout),
-	locationUpdateMaxTries: Number(process.env.STS_MQ_LOCATION_UPDATE_MAX_TRIES ?? config.messageQueue.locationUpdateMaxTries),
-	deviceUpdateWaitTime: Number(process.env.STS_MQ_DEVICE_UPDATE_WAIT_TIME ?? config.messageQueue.deviceUpdateWaitTime),
+	monitorReloadTime: Number(process.env.STS_MQ_MONITOR_RELOAD_TIME ?? config.messageQueue.monitorReloadTime ?? 1000),
+	defaultTimeout: Number(process.env.STS_MQ_DEFAULT_TIMEOUT ?? config.messageQueue.defaultTimeout ?? 900_000),
+	locationUpdateFetchTimeout: Number(process.env.STS_MQ_LOCATION_UPDATE_FETCH_TIMEOUT ?? config.messageQueue.locationUpdateFetchTimeout ?? 1000),
+	locationUpdateMaxTries: Number(process.env.STS_MQ_LOCATION_UPDATE_MAX_TRIES ?? config.messageQueue.locationUpdateMaxTries ?? 10),
+	deviceUpdateWaitTime: Number(process.env.STS_MQ_DEVICE_UPDATE_WAIT_TIME ?? config.messageQueue.deviceUpdateWaitTime ?? 1000),
+	maxQueueSize: Number(process.env.STS_MQ_MAX_QUEUE_SIZE ?? config.messageQueue.maxQueueSize ?? 15000),
+	/// A factor of the maxQueueSize to trim the queue to when it overflows
+	queueOverflowTrim: Number(process.env.STS_MQ_QUEUE_OVERFLOW_TRIM ?? config.messageQueue.queueOverflowTrim ?? 0.33),
 };
 
 export const heartbeatTimeout = Number(process.env.STS_HEARTBEAT_TIMEOUT ?? 60*1000);

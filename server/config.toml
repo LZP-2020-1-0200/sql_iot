@@ -12,4 +12,22 @@ host = "192.168.80.1"
 # monitorReloadTime is the time in milliseconds
 # between each check for new messages
 monitorReloadTime = 3000
+# defaultTimeout is the time in milliseconds
+# before a messagequeue is considered to be timed out
+# marking the queue for clearing to prevent message build up
+defaultTimeout = 900_000
+# maxQueueSize is the maximum number of messages
+# that can be stored in a queue before it is cleared
+maxQueueSize = 1000
+# locationUpdateFetchTimeout is the time in milliseconds
+# before a fetch is once again attempted for a location update
+locationUpdateFetchTimeout = 3000
+# locationUpdateMaxTries is the maximum number of times
+# a fetch for a location update is attempted before
+# the location update is considered to have failed
+locationUpdateMaxTries = 3
+# device update wait time is the time in milliseconds
+# between each check for new device updates
+deviceUpdateWaitTime = 3000
+
 
