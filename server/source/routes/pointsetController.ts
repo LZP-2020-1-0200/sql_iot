@@ -1,6 +1,6 @@
 import expressWs from 'express-ws';
 import express from 'express';
-import { Point, Pointset, Sample } from '../models/index.js';
+import { Experiment, Point, Pointset, Sample } from '../models/index.js';
 import type { PointData, calibrationSet } from '../lib/coordinate.js';
 
 /**
@@ -117,7 +117,8 @@ export default function (wsInstance:expressWs.Instance): expressWs.Router {
 			res.sendStatus(404);
 			return;
 		}
-		const pointSet = await Pointset.findByPk(ptsId, {include: [Point]});
+		const pointSet = await Pointset.findByPk(ptsId, {include: [Point, Experiment]});
+		console.log(pointSet?.experiments);
 		if(pointSet !== null){
 			res.render('pointset/item', {pointSet});
 			return;
@@ -248,20 +249,6 @@ export default function (wsInstance:expressWs.Instance): expressWs.Router {
 		res.send("OK");
 	});
 
-	pointsetController.get('/:pointsetId(\\d+)/item', async (req, res) => {
-		const ptsId = Number(req.params.pointsetId);
-		if(isNaN(ptsId)){
-			res.sendStatus(404);
-			return;
-		}
-		const pointSet = await Pointset.findByPk(ptsId, {include: [Point]});
-		if(pointSet !== null){
-			res.render('pointset/item', {pointSet});
-			return;
-		}else{
-			res.sendStatus(404);
-			return;
-		}
-	});
+	
 	return pointsetController;
 }

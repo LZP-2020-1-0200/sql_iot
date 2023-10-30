@@ -52,7 +52,7 @@ export class Pointset extends Model<PointsetAttributes, PointsetInput> {
 	declare points: Point[] | undefined;
 
 	@HasMany(() => Experiment, 'pointsetId')
-	declare measurements: Experiment[] | undefined;
+	declare experiments: Experiment[] | undefined;
 
 	async edit(
 		name: string, 
