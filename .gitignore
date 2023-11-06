@@ -3,6 +3,7 @@ node_modules
 .mypy_cache
 server/build
 server/static/bundles
+server/uploads
 **/__pycache__/
 server/secrets/**
 .env*

@@ -43,6 +43,8 @@ import experimentController from './routes/experimentController.js';
 import { Message } from './lib/messageQueueMessages.js';
 app.use('/experiments', experimentController(wsInstance));
 
+import measurementController from './routes/measurementController.js';
+app.use('/measurements', measurementController(wsInstance));
 // main page redirects to samples
 app.get('/', (req, res) => {res.redirect('/samples');});
 

@@ -33,6 +33,10 @@ export class Measurement extends Model<MeasurementAttributes, MeasurementInput>{
 
 	@AllowNull(false)
 	@Column
+	declare filename: string;
+
+	@AllowNull(false)
+	@Column
 	declare pointNumber: number;
 
     
